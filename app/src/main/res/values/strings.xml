@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Bandy</string>
+    <string name="setStartTime">시작 시간 설정</string>
+    <string name="setEndTime">마감 시간 설정</string>
 </resources>

@@ -3,7 +3,22 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Project/Android/bandy/app/src/main/res/layout/activity_main.xml" value="0.2056159420289855" />
+        <entry key="..\:/Project/Android/bandy/app/src/main/res/drawable/border.xml" value="0.2526041666666667" />
+        <entry key="..\:/Project/Android/bandy/app/src/main/res/drawable/switch_thumb.xml" value="0.1648148148148148" />
+        <entry key="..\:/Project/Android/bandy/app/src/main/res/drawable/switch_thumb_selector.xml" value="0.1648148148148148" />
+        <entry key="..\:/Project/Android/bandy/app/src/main/res/drawable/switch_track_off.xml" value="0.27025641025641023" />
+        <entry key="..\:/Project/Android/bandy/app/src/main/res/drawable/switch_track_on.xml" value="0.1648148148148148" />
+        <entry key="..\:/Project/Android/bandy/app/src/main/res/drawable/switch_track_selector.xml" value="0.1648148148148148" />
+        <entry key="..\:/Project/Android/bandy/app/src/main/res/layout/activity_main.xml" value="0.1736111111111111" />
+        <entry key="..\:/Project/Android/bandy/app/src/main/res/layout/activity_node_selector.xml" value="0.2786458333333333" />
+        <entry key="..\:/Project/Android/bandy/app/src/main/res/layout/activity_notification.xml" value="0.20923913043478262" />
+        <entry key="..\:/Project/Android/bandy/app/src/main/res/layout/activity_route_selector.xml" value="0.2786458333333333" />
+        <entry key="..\:/Project/Android/bandy/app/src/main/res/layout/activity_setting.xml" value="0.29270833333333335" />
+        <entry key="..\:/Project/Android/bandy/app/src/main/res/layout/bus_listitem.xml" value="0.371875" />
+        <entry key="..\:/Project/Android/bandy/app/src/main/res/layout/card_layout.xml" value="0.176" />
+        <entry key="..\:/Project/Android/bandy/app/src/main/res/layout/recyclerview_item.xml" value="0.1" />
+        <entry key="..\:/Project/Android/bandy/app/src/main/res/layout/row_listview.xml" value="0.2786458333333333" />
+        <entry key="..\:/Project/Android/bandy/app/src/main/res/layout/start_pointview.xml" value="0.371875" />
         <entry key="..\:/Project/Android/bandy/app/src/main/res/layout/toolbar_main.xml" value="0.264" />
       </map>
     </option>
@@ -13,5 +28,12 @@
   </component>
   <component name="ProjectType">
     <option name="id" value="Android" />
+  </component>
+  <component name="VisualizationToolProject">
+    <option name="state">
+      <ProjectState>
+        <option name="scale" value="0.1736111111111111" />
+      </ProjectState>
+    </option>
   </component>
 </project>
