@@ -1,5 +1,7 @@
 package com.example.bandy;
 
+import static android.provider.ContactsContract.Directory.PACKAGE_NAME;
+
 import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -7,6 +9,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -39,6 +42,11 @@ import com.pedro.library.AutoPermissionsListener;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -66,6 +74,8 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
     private RecyclerView recyclerView;
     private LinearLayoutManager layoutManager;
     private NoticeAdapter adapter;
+
+    private static final String ROOT_DIR = "/data/data/com.example.bandy/databases/";
 
     Intent resultIntent;
 
@@ -95,6 +105,16 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         gpsConverter = new GpsConverter();
         dbHelper = new myDBHelper(this);
 
+        try {
+            boolean bResult = isCheckDB(this); // DB가 있는지?
+            Log.d("MiniApp", "DB Check="+bResult);
+            if(!bResult){ // DB가 없으면 복사
+                setDB(this);
+            }else{ }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         searchBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -111,7 +131,10 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
                     return;
                 } else {
                     while (cursor.moveToNext()) {
-                        // int notiId, String notiName, String nodeId, String nodeName, int notiTime, String startAt, String endAt, int days, boolean isOn
+                        // int notiId, String notiName,
+                        // String nodeId, String nodeName,
+                        // int notiTime, String startAt, String endAt,
+                        // int days, boolean isOn
                         Notice notice = new Notice(
                                 cursor.getInt(0),           //notiId    알림 ID
                                 cursor.getString(1),        //notiName  알림 이름
@@ -163,7 +186,6 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         ivMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "준비중", Toast.LENGTH_SHORT).show();
                 // todo
                 // activity 이동
                 Intent intent = new Intent(getApplicationContext(), SettingActivity.class);
@@ -187,6 +209,47 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         });
 
         AutoPermissions.Companion.loadAllPermissions(this, 101);
+    }
+
+    // DB 파일 존재하는지 체크
+    private boolean isCheckDB(Context mContext) {
+        String filePath = ROOT_DIR + "bandy";
+        File file = new File(filePath);
+        if (file.exists()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    // DB 파일 없을 시 assets 에서 복사 method
+    private void setDB(Context mContext) {
+        File folder = new File(ROOT_DIR);
+        if(folder.exists()) {
+        } else {
+            folder.mkdirs();
+        }
+        AssetManager assetManager = mContext.getResources().getAssets();
+        // db파일 이름 적어주기
+        File outfile = new File(ROOT_DIR+"bandy.db");
+        InputStream is = null;
+        FileOutputStream fo = null;
+        long filesize = 0;
+        try {
+            is = assetManager.open("bandy.db", AssetManager.ACCESS_BUFFER);
+            filesize = is.available();
+            if (outfile.length() <= 0) {
+                byte[] tempdata = new byte[(int) filesize];
+                is.read(tempdata);
+                is.close();
+                outfile.createNewFile();
+                fo = new FileOutputStream(outfile);
+                fo.write(tempdata);
+                fo.close();
+            } else {}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private ActivityResultLauncher<Intent> resultLauncher  =  registerForActivityResult(
