@@ -10,7 +10,6 @@ public class Notice {
     private int notiTime;
     private ArrayList<String> routeIds;
     private ArrayList<String> routeNames;
-    private ArrayList<String> arrTime;
     private String startAt;
     private String endAt;
     private int days;
@@ -68,15 +67,21 @@ public class Notice {
         this.notiTime = notiTime;
     }
 
-    public ArrayList<String> getRouteIds() { return routeIds; }
+    public ArrayList<String> getRouteIds() {
+        return routeIds;
+    }
 
-    public void setRouteIds(String routeId) { this.routeIds.add(routeId); }
+    public void setRouteIds(ArrayList<String> routeIds) {
+        this.routeIds = routeIds;
+    }
 
-    public ArrayList<String> getRouteNames() { return routeNames; }
+    public ArrayList<String> getRouteNames() {
+        return routeNames;
+    }
 
-    public void setRouteNames(String routeName) { this.routeNames.add(routeName); }
-
-    public ArrayList<String> getArrTime() { return arrTime; }
+    public void setRouteNames(ArrayList<String> routeNames) {
+        this.routeNames = routeNames;
+    }
 
     public String getStartAt() {
         return startAt;

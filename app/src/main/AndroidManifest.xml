@@ -32,6 +32,8 @@
         <activity
             android:name=".NodeSelector"
             android:theme="@style/Theme.AppCompat.Light"
+            android:usesCleartextTraffic="true"
+            android:networkSecurityConfig="@xml/network_config"
             />
         <meta-data android:name="com.kakao.sdk.AppKey" android:value="a0df0c0e02ff4f36fd1e5e7def6dfc87"/>
         <activity

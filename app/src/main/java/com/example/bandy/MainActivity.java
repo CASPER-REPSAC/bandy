@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
 
         try {
             boolean bResult = isCheckDB(this); // DB가 있는지?
-            Log.d("MiniApp", "DB Check="+bResult);
+            Log.d("Bandy DB : ", "DB Check="+bResult);
             if(!bResult){ // DB가 없으면 복사
                 setDB(this);
             }else{ }
@@ -118,56 +118,11 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         searchBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sqlDB = dbHelper.getReadableDatabase();
-                Cursor cursor;
-                cursor = sqlDB.rawQuery("SELECT * FROM Notice;", null);
-
-                if (cursor.getCount() <= 0) {
-                    // todo
-                    // db 에 저장된 알림이 없음
-                    // 알림을 생성하라는 View 띄워주기
-                    Toast.makeText(getApplicationContext(), "알림을 생성해주세요!", Toast.LENGTH_LONG).show();
-                    cursor.close();
-                    return;
-                } else {
-                    while (cursor.moveToNext()) {
-                        // int notiId, String notiName,
-                        // String nodeId, String nodeName,
-                        // int notiTime, String startAt, String endAt,
-                        // int days, boolean isOn
-                        Notice notice = new Notice(
-                                cursor.getInt(0),           //notiId    알림 ID
-                                cursor.getString(1),        //notiName  알림 이름
-                                cursor.getString(2),        //nodeId    정류장 ID
-                                cursor.getString(3),        //nodeName  정류장 이름
-                                cursor.getInt(4),           //notiTime  몇분전
-                                cursor.getString(5),        //startAt   시작시각
-                                cursor.getString(6),        //endAt     끝시각
-                                cursor.getInt(7),           //days      요일
-                                (cursor.getInt(8) > 0)      //isOn      토글
-                                );
-                        adapter.addItem(notice);
-                    }
-                }
-                cursor.close();
-
-                Cursor routeCursor = null;
-                int cnt = adapter.getItemCount();
-                for (int i = 0; i < cnt; i++) {
-                    Notice curItem = adapter.getItem(i);
-                    routeCursor = sqlDB.rawQuery("SELECT routeID, routeName FROM RouteInNotice WHERE notiId=" + curItem.getNotiId() + ";", null);
-                    while (routeCursor.moveToNext()) {
-                        curItem.setRouteIds(routeCursor.getString(0));
-                        curItem.setRouteNames(routeCursor.getString(1));
-                    }
-                }
-
-                recyclerView.setAdapter(adapter);
-                routeCursor.close();
-                sqlDB.close();
+                setRecyclerView();
             }
         });
 
+        // todo
         // Check start
 //        CheckTask checkTask = new CheckTask();
 //        checkTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -250,6 +205,63 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void setRecyclerView() {
+        sqlDB = dbHelper.getReadableDatabase();
+        Cursor cursor;
+        cursor = sqlDB.rawQuery("SELECT * FROM Notice;", null);
+
+        if (cursor.getCount() <= 0) {
+            // todo
+            // db 에 저장된 알림이 없음
+            // 알림을 생성하라는 View 띄워주기
+            Toast.makeText(getApplicationContext(), "알림을 생성해주세요!", Toast.LENGTH_LONG).show();
+            cursor.close();
+            return;
+        } else {
+            while (cursor.moveToNext()) {
+                // int notiId, String notiName,
+                // String nodeId, String nodeName,
+                // int notiTime, String startAt, String endAt,
+                // int days, boolean isOn
+                Notice notice = new Notice(
+                        cursor.getInt(0),           //notiId    알림 ID
+                        cursor.getString(1),        //notiName  알림 이름
+                        cursor.getString(2),        //nodeId    정류장 ID
+                        cursor.getString(3),        //nodeName  정류장 이름
+                        cursor.getInt(4),           //notiTime  몇분전
+                        cursor.getString(5),        //startAt   시작시각
+                        cursor.getString(6),        //endAt     끝시각
+                        cursor.getInt(7),           //days      요일
+                        (cursor.getInt(8) > 0)      //isOn      토글
+                );
+                adapter.addItem(notice);
+            }
+        }
+        cursor.close();
+
+        Cursor routeCursor = null;
+        int cnt = adapter.getItemCount();
+        for (int i = 0; i < cnt; i++) {
+            Notice curItem = adapter.getItem(i);
+            routeCursor = sqlDB.rawQuery("SELECT routeID, routeName FROM RouteInNotice WHERE notiId=" + curItem.getNotiId() + ";", null);
+
+            ArrayList<String> routeIds = new ArrayList<>();
+            ArrayList<String> routeNames = new ArrayList<>();
+
+            while (routeCursor.moveToNext()) {
+                routeIds.add(routeCursor.getString(0));
+                routeNames.add(routeCursor.getString(1));
+            }
+
+            curItem.setRouteIds(routeIds);
+            curItem.setRouteNames(routeNames);
+        }
+
+        recyclerView.setAdapter(adapter);
+        routeCursor.close();
+        sqlDB.close();
     }
 
     private ActivityResultLauncher<Intent> resultLauncher  =  registerForActivityResult(
@@ -692,7 +704,7 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
 
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent.FLAG_IMMUTABLE);
 
         builder.setContentTitle(title);
         builder.setContentText(msg);
