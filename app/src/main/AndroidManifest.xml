@@ -13,7 +13,8 @@
         android:networkSecurityConfig="@xml/network_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Bandy">
+        android:theme="@style/Theme.Bandy"
+        android:fullBackupContent="@xml/backup_descriptor">
 
         <activity
             android:name=".SettingActivity"
@@ -31,8 +32,6 @@
         </activity>
 
         <activity
-            android:usesCleartextTraffic="true"
-            android:networkSecurityConfig="@xml/network_config"
             android:name=".NodeSelector"
             android:theme="@style/Theme.AppCompat.Light"
             android:usesCleartextTraffic="true"

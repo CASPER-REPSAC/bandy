@@ -78,7 +78,7 @@ public class RouteSelector extends AppCompatActivity {
 
 
         //정류장 번호를 지나가는 버스 목록 받아오기
-        cursor = bandy.rawQuery("Select nodeName, routeId, routeName from RouteInNode where nodeid = ?;",new String[] {selectedNodeId});
+        cursor = bandy.rawQuery("Select nodeName, routeId, routeName from RouteInNode where nodeid='" + selectedNodeId + "';", null);
         cursor.moveToFirst();
         searchedRouteCount = cursor.getCount();
         selectedNodeName = cursor.getString(0);

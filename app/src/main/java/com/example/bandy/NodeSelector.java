@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Map;
 
 public class NodeSelector extends AppCompatActivity implements OnMapReadyCallback{
-    private GoogleMap mMap;
+
     String whereSelected = "창원시";
     String startBusList;
     //final static int changwonCode = 38010;
@@ -61,6 +61,7 @@ public class NodeSelector extends AppCompatActivity implements OnMapReadyCallbac
     String[] localNodes_GPS_LATI;
 
     //구글
+    private GoogleMap mMap;
     CameraUpdateFactory cam;
     LatLng marker;
 
@@ -95,10 +96,7 @@ public class NodeSelector extends AppCompatActivity implements OnMapReadyCallbac
         getWindow().getAttributes().width = width;
         getWindow().getAttributes().height = height;
 
-
-        //ArrayList<MapPOIItem> markerArr = new ArrayList<MapPOIItem>();
-        //MapView mapView = new MapView(this);
-        //MapPOIItem marker = new MapPOIItem();
+        // 맵 나눠서 보여주기
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync((OnMapReadyCallback) this);
 

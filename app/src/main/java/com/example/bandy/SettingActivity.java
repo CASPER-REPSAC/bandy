@@ -74,9 +74,9 @@ public class SettingActivity extends AppCompatActivity {
     ArrayList<String> RouteIdList = new ArrayList<String>();
     ArrayList<String> RouteNameList = new ArrayList<String>();
 
-
-    //for create
     Button btnCreate;
+    Button btnCancel;
+
     private myDBHelper alarmHelper = new myDBHelper(this);;
     SQLiteDatabase bandy;
     Cursor cursor;
@@ -222,7 +222,7 @@ public class SettingActivity extends AppCompatActivity {
         TextView btnEndTime = findViewById(R.id.btnSetEndTime);
 
         //Start Point View
-        startPointRe = findViewById(R.id.startPointView);
+        //startPointRe = findViewById(R.id.startPointView);
         //bus = getResources().getStringArray(R.array.bus_num);
         //station = getResources().getStringArray(R.array.station_name);
 
@@ -282,8 +282,10 @@ public class SettingActivity extends AppCompatActivity {
         });
 
 
+
         //for create
         btnCreate = (Button) findViewById(R.id.alarmCreate);
+        btnCancel = (Button) findViewById(R.id.alarmCancel);
 
         btnCreate.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -333,8 +335,19 @@ public class SettingActivity extends AppCompatActivity {
                         Log.d("Routename",RouteNameList.get(i));
                     }
                 }
+                Intent intent = new Intent();
+                setResult(RESULT_OK, intent);
+                finish();
             }
 
+        });
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                setResult(RESULT_OK, intent);
+                finish();
+            }
         });
     }
 

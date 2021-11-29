@@ -8,9 +8,9 @@ public class Notice {
     private String nodeId;
     private String nodeName;
     private int notiTime;
-    private String[] routeIds = new String[2];
-    private String[] routeNames = new String[2];
-    private String[] arrTimes = new String[2];
+    private String[] routeIds = {"", ""};
+    private String[] routeNames = {"", ""};
+    private String[] arrTimes = {"", ""};
     private String startAt;
     private String endAt;
     private int days;
@@ -126,7 +126,7 @@ public class Notice {
     }
 
     public void setIsOn(boolean isOn) {
-        isOn = isOn;
+        this.isOn = isOn;
     }
 
     public boolean isFlag() {

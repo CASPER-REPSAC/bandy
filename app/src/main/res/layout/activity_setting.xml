@@ -9,25 +9,33 @@
     android:orientation="vertical"
     tools:context=".SettingActivity">
 
+    <include layout= "@layout/toolbar_setting" />
+
     <EditText
         android:id="@+id/routeTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="40dp"
-        android:layout_marginEnd="140dp"
-        android:layout_marginBottom="20dp"
+        android:layout_margin="10dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/border"
         android:ems="10"
         android:inputType="textPersonName"
         android:label="route"
         android:labelFor="@+id/routeTitle"
-        android:text=""
-        android:textColor="#000000"
-        android:textColorHint="#000000" />
+        android:padding="10dp"
+        android:hint="알림 이름"
+        android:textColor="@color/darkBlue"
+        android:textColorHint="@color/lightGray"
+        android:textSize="20sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
         android:ems="8"
         android:orientation="horizontal">
 
@@ -58,6 +66,10 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="51dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="10dp"
         android:orientation="horizontal">
 
         <CheckBox
@@ -65,14 +77,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:buttonTint="@color/darkSlateGray"
             android:text="월"
-            android:textColor="@color/black"/>
+            android:textColor="@color/black" />
 
         <CheckBox
             android:id="@+id/tuesSelector"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:buttonTint="@color/darkSlateGray"
             android:text="화"
             android:textColor="@color/black" />
 
@@ -81,6 +95,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:buttonTint="@color/darkSlateGray"
             android:text="수"
             android:textColor="@color/black" />
 
@@ -89,6 +104,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:buttonTint="@color/darkSlateGray"
             android:text="목"
             android:textColor="@color/black" />
 
@@ -97,6 +113,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:buttonTint="@color/darkSlateGray"
             android:text="금"
             android:textColor="@color/black" />
 
@@ -105,6 +122,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:buttonTint="@color/darkSlateGray"
             android:text="토"
             android:textColor="@color/black" />
 
@@ -113,108 +131,75 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:buttonTint="@color/darkSlateGray"
             android:text="일"
             android:textColor="@color/black" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="390dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
         android:orientation="vertical">
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/startPointSelector"
             android:layout_width="match_parent"
-            android:layout_height="130dp"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginBottom="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/border"
+            android:onClick="mOnPopupClick"
+            android:padding="10dp"
+            android:text="정류장 이름"
+            android:textColor="@color/darkBlue"
+            android:textSize="20sp" />
 
-            <!--ScrollView
-                android:layout_width="360dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical" />
-            </ScrollView-->
-
-
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/startPointView"
-                android:layout_width="360dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"/>
-
-            <Button
-                android:id="@+id/startPointSelector"
-                android:layout_gravity="center"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:layout_marginEnd="5dp"
-                android:layout_weight="1"
-                android:onClick="mOnPopupClick"
-                android:text="정류장" />
-
-        </LinearLayout>
-        <LinearLayout
+        <TextView
+            android:id="@+id/busSelector"
             android:layout_width="match_parent"
-            android:layout_height="130dp"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="15dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginBottom="5dp"
+            android:layout_weight="1"
+            android:background="@drawable/border"
+            android:onClick="mOnBusClick"
+            android:padding="10dp"
+            android:text="버스 이름"
+            android:textColor="@color/darkBlue"
+            android:textSize="20sp" />
 
-            <!--ScrollView
-                android:layout_width="360dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical" />
-            </ScrollView-->
-
-
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/busView"
-                android:layout_width="360dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"/>
-
-            <Button
-                android:id="@+id/busSelector"
-                android:layout_gravity="center"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:layout_marginEnd="5dp"
-                android:layout_weight="1"
-                android:onClick="mOnBusClick"
-                android:text="노선" />
-
-        </LinearLayout>
     </LinearLayout>
-
-
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
         android:orientation="vertical">
 
         <RadioGroup
             android:id="@+id/notiTimeGroup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_margin="10dp"
             android:orientation="horizontal">
 
             <RadioButton
                 android:id="@+id/min10"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="10분 마"
+                android:buttonTint="@color/darkSlateGray"
+                android:text="10분 전"
                 android:textColor="#000000" />
 
             <RadioButton
@@ -222,7 +207,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="15분 마다"
+                android:buttonTint="@color/darkSlateGray"
+                android:text="15분 전"
                 android:textColor="#000000" />
 
             <RadioButton
@@ -230,21 +216,57 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="20분 마다"
+                android:buttonTint="@color/darkSlateGray"
+                android:text="20분 전"
                 android:textColor="#000000" />
 
         </RadioGroup>
-        <Button
-            android:id="@+id/alarmCreate"
-            android:layout_gravity="center"
-            android:layout_width="wrap_content"
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
-            android:layout_marginEnd="5dp"
-            android:layout_weight="1"
-            android:onClick="OnClick"
-            android:text="생성"
-            tools:ignore="OnClick" />
+            android:orientation="horizontal"
+            android:layout_margin="10dp">
+
+            <Button
+                android:id="@+id/alarmCancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:onClick="CancelOnClick"
+                android:text="취소"
+                tools:ignore="OnClick" />
+
+            <Button
+                android:id="@+id/alarmDelete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:onClick="DeleteOnClick"
+                android:text="삭제"
+                tools:ignore="OnClick" />
+
+            <Button
+                android:id="@+id/alarmCreate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:onClick="CreateOnClick"
+                android:text="저장"
+                tools:ignore="OnClick" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout

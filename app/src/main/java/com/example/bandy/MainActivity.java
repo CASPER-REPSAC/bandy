@@ -52,6 +52,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -61,10 +62,10 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
 
     private static final String CHANNEL_ID = "channel";
     private static final String CHANNEL_NAME = "Channel";
+    private static final String ROOT_DIR = "/data/data/com.example.bandy/databases/";
 
     private TextView tvDate, tvTime;
     private ImageView ivMenu, ivWeather;
-
     private String weatherText;
     private String nx = "91";
     private String ny = "77";
@@ -75,13 +76,13 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
     private LinearLayoutManager layoutManager;
     private NoticeAdapter adapter;
 
-    private static final String ROOT_DIR = "/data/data/com.example.bandy/databases/";
-
+    LocationManager manager;
     Intent resultIntent;
 
     private GpsConverter gpsConverter;
     myDBHelper dbHelper;
     SQLiteDatabase sqlDB;
+    private CheckTask checkTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,8 +100,6 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         tvTime = (TextView) findViewById(R.id.tv_time);
         ivMenu = (ImageView) findViewById(R.id.iv_menu);
         ivWeather = (ImageView) findViewById(R.id.iv_weather);
-        Button notiBtn = (Button) findViewById(R.id.noti);
-        Button searchBtn = (Button) findViewById(R.id.dbSearch);
 
         gpsConverter = new GpsConverter();
         dbHelper = new myDBHelper(this);
@@ -115,17 +114,7 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
             e.printStackTrace();
         }
 
-        searchBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setRecyclerView();
-            }
-        });
-
-        // todo
-        // Check start
-//        CheckTask checkTask = new CheckTask();
-//        checkTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        setRecyclerView();
 
         // Clock start
         ClockTask clockTask = new ClockTask();
@@ -138,28 +127,30 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         // GPS start
         startLocationService();
 
+        adapter.setOnItemClickListener(new NoticeAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View v, int pos) {
+                // 실행 내용
+                Intent intent = new Intent(v.getContext(), SettingActivity.class);
+                intent.putExtra("MODE", false);
+                intent.putExtra("notiId", adapter.items.get(pos).getNotiId());
+                resultLauncher.launch(intent);
+            }
+        });
+
         ivMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // todo
                 // activity 이동
                 Intent intent = new Intent(getApplicationContext(), SettingActivity.class);
+                intent.putExtra("MODE", true);
                 resultLauncher.launch(intent);
-
 
                 // 받은 후 다시 DB 읽어서 adapter.arraylist init
                 // check Task cancel 후 재시작
 //                checkTask.cancel(true);
 //                checkTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            }
-        });
-
-        notiBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String title = "알람 제목" + weatherText;
-                String msg = "알람 내용입니다";
-                Notification(title, msg);
             }
         });
 
@@ -186,12 +177,12 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         }
         AssetManager assetManager = mContext.getResources().getAssets();
         // db파일 이름 적어주기
-        File outfile = new File(ROOT_DIR+"bandy.db");
+        File outfile = new File(ROOT_DIR+"bandy");
         InputStream is = null;
         FileOutputStream fo = null;
         long filesize = 0;
         try {
-            is = assetManager.open("bandy.db", AssetManager.ACCESS_BUFFER);
+            is = assetManager.open("bandy", AssetManager.ACCESS_BUFFER);
             filesize = is.available();
             if (outfile.length() <= 0) {
                 byte[] tempdata = new byte[(int) filesize];
@@ -211,6 +202,8 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         sqlDB = dbHelper.getReadableDatabase();
         Cursor cursor;
         cursor = sqlDB.rawQuery("SELECT * FROM Notice;", null);
+
+        adapter.clear();
 
         if (cursor.getCount() <= 0) {
             // todo
@@ -250,7 +243,6 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
             String[] routeIds = new String[2];
             String[] routeNames = new String[2];
 
-
             for (int j = 0; j < routeCursor.getCount(); j++) {
                 routeCursor.moveToNext();
                 routeIds[j] = routeCursor.getString(0);
@@ -264,6 +256,9 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         recyclerView.setAdapter(adapter);
         routeCursor.close();
         sqlDB.close();
+
+        checkTask = new CheckTask();
+        checkTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private ActivityResultLauncher<Intent> resultLauncher  =  registerForActivityResult(
@@ -272,23 +267,9 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
 
                 @Override
                 public void onActivityResult(ActivityResult result) {
-                    Log.d("Enter", " 확인");
-                    if (result.getResultCode() == Activity.RESULT_OK) {
-                        Log.d("Result Code Check", "결과 코드 확인");
-
-                        resultIntent = result.getData();
-                        //데이터 받기
-//                        NODEID = resultIntent.getStringExtra("NODE_ID");
-//                        NODENAME = resultIntent.getStringExtra("NODE_NAME");
-//
-//                        Log.d("DATA",NODENAME);
-//                        if (NODEID == null || result == null) {
-//                            Log.d("Result Node Error", "No data");
-//                        } else {
-//                            Log.d("Result Node Check", NODENAME);
-//                        }
-                    }
-
+                    Log.e("MAIN ACTIVITY RETURN : ", " 확인");
+                    resultIntent = result.getData();
+                    setRecyclerView();
                 }});
 
     // SQLite Open Class
@@ -340,17 +321,30 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
                 try {
                     int cnt = adapter.getItemCount();
 
-                    for(int i = 0; i < cnt; i++) {
-                        Notice item = adapter.getItem(i);
-                        // 1. 전체 item 순회
-                        if (item.getStartAt().equals(timeFormat.format(Calendar.getInstance().getTime()))
+                    // 1. 전체 item 순회
+                    for(int noticeNo = 0; noticeNo < cnt; noticeNo++) {
+                        Notice item = adapter.getItem(noticeNo);
+                        // 현재 시간과 설정 시간대 사이 체크
+                        DateFormat dateFormat = new SimpleDateFormat("HH:mm");
+                        String time = dateFormat.format(System.currentTimeMillis());
+                        Date now = dateFormat.parse(time);
+                        Date startTime = dateFormat.parse(item.getStartAt());
+                        Date endTime = dateFormat.parse(item.getEndAt());
+
+                        Log.e("Cur TIME : ", time);
+                        Log.e("Start TIME : ", item.getStartAt());
+                        Log.e("End TIME : ", item.getEndAt());
+
+                        // 요일 체크
+                        // 토글 체크
+
+                        if (now.after(startTime) && now.before(endTime)
                                 && item.isOn()) { // 요일 비교 추가
-                            // 2. 시작시각과 현재 시각, 요일 비교
-                            // 3. toggle on 확인
+                            Log.e("CHECK TIME if : ", "IN");
                             nodeId = item.getNodeId();
                             String[] routes = item.getRouteIds();
-                            for (int j = 0; j < 2; j++) {
-                                routeId = routes[j];
+                            for (int routeNo = 0; routeNo < 2; routeNo++) {
+                                routeId = routes[routeNo];
                                 if (!routeId.equals("")) {
                                     int arrTime = 0;
                                     urlBuilder = new StringBuilder(endPoint);
@@ -407,14 +401,12 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
                                         eventType = parser.next();
                                     }
 
-                                    publishProgress(i, j, arrTime);
+                                    publishProgress(noticeNo, routeNo, arrTime);
                                 }
                             }
-
-                            Log.d("API THREAD : ", "START[" + i + "]");
+                            Log.d("CHECK THREAD : ", "START[" + noticeNo + "]");
                         }
                     }
-                    Log.d("Check SLEEP : ", "START");
                     Thread.sleep(10000); // 10초 sleep
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -428,13 +420,14 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         protected void onProgressUpdate(Integer... values) {
             // todo
             super.onProgressUpdate(values);
-            int position = values[0];
+            int noticeNo = values[0];
             int routeNo = values[1];
             int time = values[2];
 
-            Notice notice = adapter.getItem(position);
+            Notice notice = adapter.getItem(noticeNo);
             String arrTime = Integer.toString(time / 60);
             notice.setArrTimes(routeNo, arrTime);
+            //recyclerView.notify();
             recyclerView.setAdapter(adapter);
 
             if (!notice.isFlag() && time <= notice.getNotiTime() * 60) {
@@ -688,7 +681,7 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
     // Location Manage Method
     private void startLocationService() {
         // Location 객체 참조하기
-        LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         try {
             GPSListener gpsListener = new GPSListener();
             long minTime = 10000;
@@ -717,7 +710,8 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
                 PendingIntent.FLAG_IMMUTABLE);
 
-        builder.setContentTitle(title);
+        String mTitle = title + weatherText;
+        builder.setContentTitle(mTitle);
         builder.setContentText(msg);
         builder.setSmallIcon(android.R.drawable.ic_menu_view);
         builder.setAutoCancel(true);
