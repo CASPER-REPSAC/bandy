@@ -35,6 +35,8 @@
             android:networkSecurityConfig="@xml/network_config"
             android:name=".NodeSelector"
             android:theme="@style/Theme.AppCompat.Light"
+            android:usesCleartextTraffic="true"
+            android:networkSecurityConfig="@xml/network_config"
             />
         <meta-data
             android:name="com.google.android.geo.API_KEY"

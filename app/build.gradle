@@ -30,7 +30,6 @@ android {
 
         // Configures multiple APKs based on screen density.
         density {
-
             // Configures multiple APKs based on screen density.
             enable false
         }
@@ -39,7 +38,6 @@ android {
         abi {
             // Enables building multiple APKs per ABI.
             enable true
-
             // By default all ABIs are included, so use reset() and include to specify that we only
             // want APKs for armeabi-v7a, arm64-v8a, and x86
 
@@ -82,4 +80,6 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    implementation 'androidx.work:work-runtime-ktx:2.7.0'
+    implementation files('libs/libDaumMapAndroid.jar')
 }

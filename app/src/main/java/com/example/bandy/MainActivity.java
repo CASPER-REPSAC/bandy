@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
 
         try {
             boolean bResult = isCheckDB(this); // DB가 있는지?
-            Log.d("MiniApp", "DB Check="+bResult);
+            Log.d("Bandy DB : ", "DB Check="+bResult);
             if(!bResult){ // DB가 없으면 복사
                 setDB(this);
             }else{ }
@@ -118,56 +118,11 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         searchBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sqlDB = dbHelper.getReadableDatabase();
-                Cursor cursor;
-                cursor = sqlDB.rawQuery("SELECT * FROM Notice;", null);
-
-                if (cursor.getCount() <= 0) {
-                    // todo
-                    // db 에 저장된 알림이 없음
-                    // 알림을 생성하라는 View 띄워주기
-                    Toast.makeText(getApplicationContext(), "알림을 생성해주세요!", Toast.LENGTH_LONG).show();
-                    cursor.close();
-                    return;
-                } else {
-                    while (cursor.moveToNext()) {
-                        // int notiId, String notiName,
-                        // String nodeId, String nodeName,
-                        // int notiTime, String startAt, String endAt,
-                        // int days, boolean isOn
-                        Notice notice = new Notice(
-                                cursor.getInt(0),           //notiId    알림 ID
-                                cursor.getString(1),        //notiName  알림 이름
-                                cursor.getString(2),        //nodeId    정류장 ID
-                                cursor.getString(3),        //nodeName  정류장 이름
-                                cursor.getInt(4),           //notiTime  몇분전
-                                cursor.getString(5),        //startAt   시작시각
-                                cursor.getString(6),        //endAt     끝시각
-                                cursor.getInt(7),           //days      요일
-                                (cursor.getInt(8) > 0)      //isOn      토글
-                                );
-                        adapter.addItem(notice);
-                    }
-                }
-                cursor.close();
-
-                Cursor routeCursor = null;
-                int cnt = adapter.getItemCount();
-                for (int i = 0; i < cnt; i++) {
-                    Notice curItem = adapter.getItem(i);
-                    routeCursor = sqlDB.rawQuery("SELECT routeID, routeName FROM RouteInNotice WHERE notiId=" + curItem.getNotiId() + ";", null);
-                    while (routeCursor.moveToNext()) {
-                        curItem.setRouteIds(routeCursor.getString(0));
-                        curItem.setRouteNames(routeCursor.getString(1));
-                    }
-                }
-
-                recyclerView.setAdapter(adapter);
-                routeCursor.close();
-                sqlDB.close();
+                setRecyclerView();
             }
         });
 
+        // todo
         // Check start
 //        CheckTask checkTask = new CheckTask();
 //        checkTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -252,6 +207,65 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         }
     }
 
+    public void setRecyclerView() {
+        sqlDB = dbHelper.getReadableDatabase();
+        Cursor cursor;
+        cursor = sqlDB.rawQuery("SELECT * FROM Notice;", null);
+
+        if (cursor.getCount() <= 0) {
+            // todo
+            // db 에 저장된 알림이 없음
+            // 알림을 생성하라는 View 띄워주기
+            Toast.makeText(getApplicationContext(), "알림을 생성해주세요!", Toast.LENGTH_LONG).show();
+            cursor.close();
+            return;
+        } else {
+            while (cursor.moveToNext()) {
+                // int notiId, String notiName,
+                // String nodeId, String nodeName,
+                // int notiTime, String startAt, String endAt,
+                // int days, boolean isOn
+                Notice notice = new Notice(
+                        cursor.getInt(0),           //notiId    알림 ID
+                        cursor.getString(1),        //notiName  알림 이름
+                        cursor.getString(2),        //nodeId    정류장 ID
+                        cursor.getString(3),        //nodeName  정류장 이름
+                        cursor.getInt(4),           //notiTime  몇분전
+                        cursor.getString(5),        //startAt   시작시각
+                        cursor.getString(6),        //endAt     끝시각
+                        cursor.getInt(7),           //days      요일
+                        (cursor.getInt(8) > 0)      //isOn      토글
+                );
+                adapter.addItem(notice);
+            }
+        }
+        cursor.close();
+
+        Cursor routeCursor = null;
+        int cnt = adapter.getItemCount();
+        for (int i = 0; i < cnt; i++) {
+            Notice curItem = adapter.getItem(i);
+            routeCursor = sqlDB.rawQuery("SELECT routeID, routeName FROM RouteInNotice WHERE notiId=" + curItem.getNotiId() + ";", null);
+
+            String[] routeIds = new String[2];
+            String[] routeNames = new String[2];
+
+
+            for (int j = 0; j < routeCursor.getCount(); j++) {
+                routeCursor.moveToNext();
+                routeIds[j] = routeCursor.getString(0);
+                routeNames[j] = routeCursor.getString(1);
+            }
+
+            curItem.setRouteIds(routeIds);
+            curItem.setRouteNames(routeNames);
+        }
+
+        recyclerView.setAdapter(adapter);
+        routeCursor.close();
+        sqlDB.close();
+    }
+
     private ActivityResultLauncher<Intent> resultLauncher  =  registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
@@ -309,8 +323,6 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         private String nodeId;
         private String routeId;
 
-        private int arrTime;
-
         private StringBuilder urlBuilder;
         private XmlPullParserFactory xmlPullParserFactory;
         private XmlPullParser parser;
@@ -336,65 +348,67 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
                             // 2. 시작시각과 현재 시각, 요일 비교
                             // 3. toggle on 확인
                             nodeId = item.getNodeId();
-                            ArrayList<String> routes = item.getRouteIds();
-                            for (int j = 0; j < routes.size(); j++) {
-                                routeId = routes.get(j);
+                            String[] routes = item.getRouteIds();
+                            for (int j = 0; j < 2; j++) {
+                                routeId = routes[j];
+                                if (!routeId.equals("")) {
+                                    int arrTime = 0;
+                                    urlBuilder = new StringBuilder(endPoint);
+                                    urlBuilder.append("?" + URLEncoder.encode("serviceKey", "UTF-8") + "=" + key);
+                                    urlBuilder.append("&" + URLEncoder.encode("cityCode", "UTF-8") + "=" + cityCode);
+                                    urlBuilder.append("&" + URLEncoder.encode("nodeId", "UTF-8") + "=" + nodeId);
+                                    urlBuilder.append("&" + URLEncoder.encode("routeId", "UTF-8") + "=" + routeId);
 
-                                urlBuilder = new StringBuilder(endPoint);
-                                urlBuilder.append("?" + URLEncoder.encode("serviceKey", "UTF-8") + "=" + key);
-                                urlBuilder.append("&" + URLEncoder.encode("cityCode", "UTF-8") + "=" + cityCode);
-                                urlBuilder.append("&" + URLEncoder.encode("nodeId", "UTF-8") + "=" + nodeId);
-                                urlBuilder.append("&" + URLEncoder.encode("routeId", "UTF-8") + "=" + routeId);
 
+                                    URL url = new URL(urlBuilder.toString());
+                                    xmlPullParserFactory = XmlPullParserFactory.newInstance();
+                                    parser = xmlPullParserFactory.newPullParser();
 
-                                URL url = new URL(urlBuilder.toString());
-                                xmlPullParserFactory = XmlPullParserFactory.newInstance();
-                                parser = xmlPullParserFactory.newPullParser();
+                                    InputStream is = url.openStream();
+                                    parser.setInput(new InputStreamReader(is, "UTF-8"));
+                                    String tagName = "";
+                                    int eventType = parser.getEventType();
 
-                                InputStream is = url.openStream();
-                                parser.setInput(new InputStreamReader(is, "UTF-8"));
-                                String tagName = "";
-                                int eventType = parser.getEventType();
-
-                                while (eventType != XmlPullParser.END_DOCUMENT) {
-                                    switch (eventType) {
-                                        //태그가 시작
-                                        case XmlPullParser.START_TAG:
-                                            tagName=parser.getName();
-                                            if (parser.getName().equals("item")) {
-                                                //객체 생성
-                                            }
-                                            break;
-                                        //태그의 끝
-                                        case XmlPullParser.END_TAG:
-                                            if (parser.getName().equals("item")) {
-                                                //객체를 리스트에 추가
-                                            }
-                                            break;
-                                        //태그 안의 텍스트
-                                        case XmlPullParser.TEXT:
-                                            switch(tagName) {
-                                                case "arrprevstationcnt":
-                                                    break;
-                                                case "arrtime": {
-                                                    arrTime = Integer.parseInt(parser.getText());
-                                                    break;
+                                    while (eventType != XmlPullParser.END_DOCUMENT) {
+                                        switch (eventType) {
+                                            //태그가 시작
+                                            case XmlPullParser.START_TAG:
+                                                tagName=parser.getName();
+                                                if (parser.getName().equals("item")) {
+                                                    //객체 생성
                                                 }
-                                                case "nodeid":
-                                                case "nodenm":
-                                                case "routeid":
-                                                case "routeno":
-                                                case "routetp":
-                                                case "vehicletp":
-                                                    break;
-                                            }
-                                            break;
+                                                break;
+                                            //태그의 끝
+                                            case XmlPullParser.END_TAG:
+                                                if (parser.getName().equals("item")) {
+                                                    //객체를 리스트에 추가
+                                                }
+                                                break;
+                                            //태그 안의 텍스트
+                                            case XmlPullParser.TEXT:
+                                                switch(tagName) {
+                                                    case "arrprevstationcnt":
+                                                        break;
+                                                    case "arrtime": {
+                                                        arrTime = Integer.parseInt(parser.getText());
+                                                        break;
+                                                    }
+                                                    case "nodeid":
+                                                    case "nodenm":
+                                                    case "routeid":
+                                                    case "routeno":
+                                                    case "routetp":
+                                                    case "vehicletp":
+                                                        break;
+                                                }
+                                                break;
+                                        }
+                                        //다음으로 이동
+                                        eventType = parser.next();
                                     }
-                                    //다음으로 이동
-                                    eventType = parser.next();
-                                }
 
-                                publishProgress(i, j, arrTime);
+                                    publishProgress(i, j, arrTime);
+                                }
                             }
 
                             Log.d("API THREAD : ", "START[" + i + "]");
@@ -419,6 +433,15 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
             int time = values[2];
 
             Notice notice = adapter.getItem(position);
+            String arrTime = Integer.toString(time / 60);
+            notice.setArrTimes(routeNo, arrTime);
+            recyclerView.setAdapter(adapter);
+
+            if (!notice.isFlag() && time <= notice.getNotiTime() * 60) {
+                String msg = "[" + notice.getNodeName() +  "]" + notice.getRouteName(routeNo) + "번 버스가 " + arrTime + "분 후 도착합니다.";
+                Notification(notice.getNotiName(), msg);
+                notice.setFlag(true);
+            }
         }
 
         @Override
@@ -692,7 +715,7 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
 
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent.FLAG_IMMUTABLE);
 
         builder.setContentTitle(title);
         builder.setContentText(msg);

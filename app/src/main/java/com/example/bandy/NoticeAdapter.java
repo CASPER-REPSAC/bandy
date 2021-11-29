@@ -9,6 +9,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 
 public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.ViewHolder> {
@@ -20,6 +22,8 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.ViewHolder
         TextView nodeName;
         TextView route1;
         TextView route2;
+        TextView time1;
+        TextView time2;
         Switch isOn;
 
         public ViewHolder(View itemView) {
@@ -29,12 +33,18 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.ViewHolder
             nodeName = itemView.findViewById(R.id.tvNodeName);
             route1 = itemView.findViewById(R.id.tvRoute1);
             route2 = itemView.findViewById(R.id.tvRoute2);
+            time1 = itemView.findViewById(R.id.tvArrTime1);
+            time2 = itemView.findViewById(R.id.tvArrTime2);
             isOn = itemView.findViewById(R.id.isOnSwitch);
         }
 
         public void setItem(Notice item) {
             notiName.setText(item.getNotiName());
             nodeName.setText(item.getNodeName());
+            route1.setText(item.getRouteName(1));
+            route2.setText(item.getRouteName(2));
+            time1.setText(item.getArrTimes(1));
+            time2.setText(item.getArrTimes(2));
             if (item.isOn()) {
                 isOn.setChecked(true);
             } else {

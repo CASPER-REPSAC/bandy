@@ -5,9 +5,9 @@
             <certificates src="system" />
         </trust-anchors>
     </base-config>
+    <!-- http 프로토콜 허용을 위해 필요 -->
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">openapi.airkorea.or.kr</domain>
         <domain includeSubdomains="true">apis.data.go.kr</domain>
     </domain-config>
 </network-security-config>
-<!-- http 프로토콜 허용을 위해 필요 -->
