@@ -14,6 +14,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Bandy">
+
         <activity
             android:name=".SettingActivity"
             android:exported="true" />
@@ -30,10 +31,14 @@
         </activity>
 
         <activity
+            android:usesCleartextTraffic="true"
+            android:networkSecurityConfig="@xml/network_config"
             android:name=".NodeSelector"
             android:theme="@style/Theme.AppCompat.Light"
             />
-        <meta-data android:name="com.kakao.sdk.AppKey" android:value="a0df0c0e02ff4f36fd1e5e7def6dfc87"/>
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
         <activity
             android:name=".RouteSelector"
             android:theme="@style/Theme.AppCompat.Light"

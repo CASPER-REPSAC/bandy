@@ -3,8 +3,12 @@ package com.example.bandy;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -20,9 +24,16 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import net.daum.mf.map.api.MapPOIItem;
-import net.daum.mf.map.api.MapPoint;
-import net.daum.mf.map.api.MapView;
+import android.os.Bundle;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +41,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class NodeSelector extends AppCompatActivity {
+public class NodeSelector extends AppCompatActivity implements OnMapReadyCallback{
+    private GoogleMap mMap;
     String whereSelected = "창원시";
     String startBusList;
     //final static int changwonCode = 38010;
@@ -48,10 +60,15 @@ public class NodeSelector extends AppCompatActivity {
     String[] localNodes_GPS_LONG;
     String[] localNodes_GPS_LATI;
 
-    private String selectedName;
+    //구글
+    CameraUpdateFactory cam;
+    LatLng marker;
+
+
+    private String selectedName = "현재 위치";
     private String selectedID;
-    private String selectedGPS_Long;
-    private String selectedGPS_Lati;
+    private String selectedGPS_Long = "128.695744";
+    private String selectedGPS_Lati = "35.241426";
     Map<String, Integer> localList;
 
     @Override
@@ -79,9 +96,11 @@ public class NodeSelector extends AppCompatActivity {
         getWindow().getAttributes().height = height;
 
 
-        ArrayList<MapPOIItem> markerArr = new ArrayList<MapPOIItem>();
-        MapView mapView = new MapView(this);
-        MapPOIItem marker = new MapPOIItem();
+        //ArrayList<MapPOIItem> markerArr = new ArrayList<MapPOIItem>();
+        //MapView mapView = new MapView(this);
+        //MapPOIItem marker = new MapPOIItem();
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync((OnMapReadyCallback) this);
 
         //Map Literal for local - local number
         Map<String, Integer> localList = new HashMap<String, Integer>();
@@ -256,14 +275,11 @@ public class NodeSelector extends AppCompatActivity {
         localNodes_GPS_LATI = res.getStringArray(R.array.GPS_LATI_38010);
         localNodes_TP = res.getStringArray(R.array.NODE_TP_38010);
 
-        selectedName = "현재 위치";
-        selectedGPS_Lati = "35.24254244199675";
-        selectedGPS_Long = "128.69720951959144";
 
         //Kakao Map 호출
-        ViewGroup mapViewContainer = (ViewGroup) findViewById(R.id.map_view);
-        mapViewContainer.addView(mapView);
-        mapView.setZoomLevel(2, true);
+        //ViewGroup mapViewContainer = (ViewGroup) findViewById(R.id.map_view);
+        //mapViewContainer.addView(mapView);
+        //mapView.setZoomLevel(2, true);
 
         //검색 기능
         //editSearch = (EditText) findViewById(R.id.start_point_search);
@@ -297,20 +313,44 @@ public class NodeSelector extends AppCompatActivity {
                 selectedGPS_Lati = localNodes_GPS_LATI[list.indexOf(((TextView) view).getText().toString())];
                 Toast.makeText(getApplicationContext(), selectedID, Toast.LENGTH_SHORT).show();
 
+                marker = new LatLng(Double.valueOf(selectedGPS_Lati), Double.valueOf(selectedGPS_Long));
+                mMap.clear();
+                mMap.addMarker(new MarkerOptions()
+                        .position(marker)
+                        .title(selectedName));
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(marker));
                 //정류장 위치를 1개만 출력하기 위해 마커 생성 전 초기화
-                markerArr.clear();
+                //markerArr.clear();
 
                 //선택한 좌표로 마커 생성
-                marker.setMapPoint(MapPoint.mapPointWithGeoCoord(Double.parseDouble(selectedGPS_Lati), Double.parseDouble(selectedGPS_Long)));
-                marker.setItemName(selectedName);
-                markerArr.add(marker);
-                mapView.addPOIItems(markerArr.toArray(new MapPOIItem[markerArr.size()]));
+                //marker.setMapPoint(MapPoint.mapPointWithGeoCoord(Double.parseDouble(selectedGPS_Lati), Double.parseDouble(selectedGPS_Long)));
+                //marker.setItemName(selectedName);
+                //markerArr.add(marker);
+                //mapView.addPOIItems(markerArr.toArray(new MapPOIItem[markerArr.size()]));
 
                 //마커 위치로 화면 이동
-                mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(Double.parseDouble(selectedGPS_Lati), Double.parseDouble(selectedGPS_Long)), true);
+                //mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(Double.parseDouble(selectedGPS_Lati), Double.parseDouble(selectedGPS_Long)), true);
             }
         });
 
+
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+        mMap.setMinZoomPreference(16.0f);
+        mMap.setMaxZoomPreference(25.0f);
+        // Add a marker in Sydney and move the camera
+        marker = new LatLng(Double.valueOf(selectedGPS_Lati), Double.valueOf(selectedGPS_Long));
+        mMap.clear();
+
+
+        mMap.addMarker(new MarkerOptions()
+                .position(marker)
+                .title(selectedName));
+        cam.zoomTo(16.0f);
+        mMap.moveCamera(cam.newLatLng(marker));
 
     }
 
@@ -389,7 +429,12 @@ public class NodeSelector extends AppCompatActivity {
 
     }
 
-    public void mOnClick(View v){
-        finish();
-    }
+    //구글맵 마커 클릭 리스너
+    GoogleMap.OnMarkerClickListener markerClickListener = new GoogleMap.OnMarkerClickListener() {
+        @Override
+        public boolean onMarkerClick(Marker marker) {
+            return false;
+        }
+    };
+
 }
