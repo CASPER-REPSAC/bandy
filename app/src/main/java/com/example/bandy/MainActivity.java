@@ -320,6 +320,7 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
             while (!isCancelled()) {
                 try {
                     int cnt = adapter.getItemCount();
+                    Thread.sleep(10000); // 10초 sleep
 
                     // 1. 전체 item 순회
                     for(int noticeNo = 0; noticeNo < cnt; noticeNo++) {
@@ -407,7 +408,6 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
                             Log.d("CHECK THREAD : ", "START[" + noticeNo + "]");
                         }
                     }
-                    Thread.sleep(10000); // 10초 sleep
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

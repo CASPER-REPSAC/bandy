@@ -49,6 +49,7 @@ public class SettingActivity extends AppCompatActivity {
     //for Title
     TextView titleView;
     String title;
+    boolean isSetTitle = false;
     EditText inputTitle;
 
     //for days
@@ -290,8 +291,8 @@ public class SettingActivity extends AppCompatActivity {
         btnCreate.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                if(RouteIdList == null || title == null){
-                    Log.d("Nodata","Input all data");
+                if(RouteIdList == null || !isSetTitle) {
+                    Toast.makeText(getApplicationContext(), "모두 입력해주세요", Toast.LENGTH_SHORT).show();
                 }else{
                     if (days > 127){
                         days = 127;
@@ -334,10 +335,10 @@ public class SettingActivity extends AppCompatActivity {
                         Log.d("Routeid",RouteIdList.get(i));
                         Log.d("Routename",RouteNameList.get(i));
                     }
+                    Intent intent = new Intent();
+                    setResult(RESULT_OK, intent);
+                    finish();
                 }
-                Intent intent = new Intent();
-                setResult(RESULT_OK, intent);
-                finish();
             }
 
         });
@@ -357,6 +358,7 @@ public class SettingActivity extends AppCompatActivity {
             switch (v.getId()){
                 case R.id.routeTitle:
                     title = inputTitle.toString();
+                    isSetTitle = true;
                     Log.d("title",title);
                     break;
             }
