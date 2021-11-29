@@ -1,8 +1,5 @@
 package com.example.bandy;
 
-import static android.provider.ContactsContract.Directory.PACKAGE_NAME;
-
-import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -21,7 +18,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,19 +38,15 @@ import com.pedro.library.AutoPermissionsListener;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -63,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
     private static final String CHANNEL_ID = "channel";
     private static final String CHANNEL_NAME = "Channel";
     private static final String ROOT_DIR = "/data/data/com.example.bandy/databases/";
+    private final int[] check = {1, 2, 4, 8, 16, 32, 64};
 
     private TextView tvDate, tvTime;
     private ImageView ivMenu, ivWeather;
@@ -141,16 +134,9 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         ivMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // todo
-                // activity 이동
                 Intent intent = new Intent(getApplicationContext(), SettingActivity.class);
                 intent.putExtra("MODE", true);
                 resultLauncher.launch(intent);
-
-                // 받은 후 다시 DB 읽어서 adapter.arraylist init
-                // check Task cancel 후 재시작
-//                checkTask.cancel(true);
-//                checkTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         });
 
@@ -319,6 +305,9 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
 
             while (!isCancelled()) {
                 try {
+                    Calendar calendar = Calendar.getInstance();
+                    int nWeek = calendar.get(Calendar.DAY_OF_WEEK);
+
                     int cnt = adapter.getItemCount();
                     Thread.sleep(10000); // 10초 sleep
 
@@ -326,21 +315,57 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
                     for(int noticeNo = 0; noticeNo < cnt; noticeNo++) {
                         Notice item = adapter.getItem(noticeNo);
                         // 현재 시간과 설정 시간대 사이 체크
-                        DateFormat dateFormat = new SimpleDateFormat("HH:mm");
-                        String time = dateFormat.format(System.currentTimeMillis());
-                        Date now = dateFormat.parse(time);
-                        Date startTime = dateFormat.parse(item.getStartAt());
-                        Date endTime = dateFormat.parse(item.getEndAt());
+                        DateFormat timeFormat = new SimpleDateFormat("HH:mm");
+                        String time = timeFormat.format(System.currentTimeMillis());
+                        Date now = timeFormat.parse(time);
+                        Date startTime = timeFormat.parse(item.getStartAt());
+                        Date endTime = timeFormat.parse(item.getEndAt());
 
-                        Log.e("Cur TIME : ", time);
-                        Log.e("Start TIME : ", item.getStartAt());
-                        Log.e("End TIME : ", item.getEndAt());
+                        int days = item.getDays();
+                        boolean[] set = new boolean[7];
+                        for (int i = 0; i < 7; i++) {
+                            set[i] = false;
+                        }
 
-                        // 요일 체크
-                        // 토글 체크
+                        for (int i = 0; i < 7; i++) {
+                            if ((check[i] & days) == 1) {
+                                set[i] = true;
+                            }
+                        }
 
-                        if (now.after(startTime) && now.before(endTime)
-                                && item.isOn()) { // 요일 비교 추가
+                        boolean setDay = false;
+
+                        if (nWeek == 1) {
+                            if (set[6]) {
+                                setDay = true;
+                            }
+                        } else if (nWeek == 2) {
+                            if (set[0]) {
+                                setDay = true;
+                            }
+                        } else if (nWeek == 3) {
+                            if (set[1]) {
+                                setDay = true;
+                            }
+                        } else if (nWeek == 4) {
+                            if (set[2]) {
+                                setDay = true;
+                            }
+                        } else if (nWeek == 5) {
+                            if (set[3]) {
+                                setDay = true;
+                            }
+                        } else if (nWeek == 6) {
+                            if (set[4]) {
+                                setDay = true;
+                            }
+                        } else if (nWeek == 7) {
+                            if (set[5]) {
+                                setDay = true;
+                            }
+                        }
+
+                        if (now.after(startTime) && now.before(endTime) && setDay && item.isOn()) {
                             Log.e("CHECK TIME if : ", "IN");
                             nodeId = item.getNodeId();
                             String[] routes = item.getRouteIds();
@@ -405,7 +430,6 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
                                     publishProgress(noticeNo, routeNo, arrTime);
                                 }
                             }
-                            Log.d("CHECK THREAD : ", "START[" + noticeNo + "]");
                         }
                     }
                 } catch (Exception e) {
@@ -426,7 +450,7 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
 
             Notice notice = adapter.getItem(noticeNo);
             String arrTime = Integer.toString(time / 60);
-            notice.setArrTimes(routeNo, arrTime);
+            notice.setArrTimes(routeNo, arrTime + "분전");
             //recyclerView.notify();
             recyclerView.setAdapter(adapter);
 
