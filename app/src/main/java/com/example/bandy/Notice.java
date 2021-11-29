@@ -8,12 +8,14 @@ public class Notice {
     private String nodeId;
     private String nodeName;
     private int notiTime;
-    private ArrayList<String> routeIds;
-    private ArrayList<String> routeNames;
+    private String[] routeIds = new String[2];
+    private String[] routeNames = new String[2];
+    private String[] arrTimes = new String[2];
     private String startAt;
     private String endAt;
     private int days;
     private boolean isOn;
+    private boolean flag = false;
 
     public Notice(int notiId, String notiName, String nodeId, String nodeName, int notiTime, String startAt, String endAt, int days, boolean isOn) {
         this.notiId = notiId;
@@ -67,20 +69,32 @@ public class Notice {
         this.notiTime = notiTime;
     }
 
-    public ArrayList<String> getRouteIds() {
+    public String[] getRouteIds() {
         return routeIds;
     }
 
-    public void setRouteIds(ArrayList<String> routeIds) {
+    public String getRouteIds(int position) {
+        return routeIds[position];
+    }
+
+    public void setRouteIds(String[] routeIds) {
         this.routeIds = routeIds;
     }
 
-    public ArrayList<String> getRouteNames() {
-        return routeNames;
+    public String getRouteName(int position) {
+        return routeNames[position];
     }
 
-    public void setRouteNames(ArrayList<String> routeNames) {
+    public void setRouteNames(String[] routeNames) {
         this.routeNames = routeNames;
+    }
+
+    public String getArrTimes(int position) {
+        return arrTimes[position];
+    }
+
+    public void setArrTimes(int position, String arrTimes) {
+        this.arrTimes[position] = arrTimes;
     }
 
     public String getStartAt() {
@@ -113,5 +127,13 @@ public class Notice {
 
     public void setIsOn(boolean isOn) {
         isOn = isOn;
+    }
+
+    public boolean isFlag() {
+        return flag;
+    }
+
+    public void setFlag(boolean flag) {
+        this.flag = flag;
     }
 }

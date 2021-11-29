@@ -247,12 +247,14 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
             Notice curItem = adapter.getItem(i);
             routeCursor = sqlDB.rawQuery("SELECT routeID, routeName FROM RouteInNotice WHERE notiId=" + curItem.getNotiId() + ";", null);
 
-            ArrayList<String> routeIds = new ArrayList<>();
-            ArrayList<String> routeNames = new ArrayList<>();
+            String[] routeIds = new String[2];
+            String[] routeNames = new String[2];
 
-            while (routeCursor.moveToNext()) {
-                routeIds.add(routeCursor.getString(0));
-                routeNames.add(routeCursor.getString(1));
+
+            for (int j = 0; j < routeCursor.getCount(); j++) {
+                routeCursor.moveToNext();
+                routeIds[j] = routeCursor.getString(0);
+                routeNames[j] = routeCursor.getString(1);
             }
 
             curItem.setRouteIds(routeIds);
@@ -321,8 +323,6 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         private String nodeId;
         private String routeId;
 
-        private int arrTime;
-
         private StringBuilder urlBuilder;
         private XmlPullParserFactory xmlPullParserFactory;
         private XmlPullParser parser;
@@ -348,65 +348,67 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
                             // 2. 시작시각과 현재 시각, 요일 비교
                             // 3. toggle on 확인
                             nodeId = item.getNodeId();
-                            ArrayList<String> routes = item.getRouteIds();
-                            for (int j = 0; j < routes.size(); j++) {
-                                routeId = routes.get(j);
+                            String[] routes = item.getRouteIds();
+                            for (int j = 0; j < 2; j++) {
+                                routeId = routes[j];
+                                if (!routeId.equals("")) {
+                                    int arrTime = 0;
+                                    urlBuilder = new StringBuilder(endPoint);
+                                    urlBuilder.append("?" + URLEncoder.encode("serviceKey", "UTF-8") + "=" + key);
+                                    urlBuilder.append("&" + URLEncoder.encode("cityCode", "UTF-8") + "=" + cityCode);
+                                    urlBuilder.append("&" + URLEncoder.encode("nodeId", "UTF-8") + "=" + nodeId);
+                                    urlBuilder.append("&" + URLEncoder.encode("routeId", "UTF-8") + "=" + routeId);
 
-                                urlBuilder = new StringBuilder(endPoint);
-                                urlBuilder.append("?" + URLEncoder.encode("serviceKey", "UTF-8") + "=" + key);
-                                urlBuilder.append("&" + URLEncoder.encode("cityCode", "UTF-8") + "=" + cityCode);
-                                urlBuilder.append("&" + URLEncoder.encode("nodeId", "UTF-8") + "=" + nodeId);
-                                urlBuilder.append("&" + URLEncoder.encode("routeId", "UTF-8") + "=" + routeId);
 
+                                    URL url = new URL(urlBuilder.toString());
+                                    xmlPullParserFactory = XmlPullParserFactory.newInstance();
+                                    parser = xmlPullParserFactory.newPullParser();
 
-                                URL url = new URL(urlBuilder.toString());
-                                xmlPullParserFactory = XmlPullParserFactory.newInstance();
-                                parser = xmlPullParserFactory.newPullParser();
+                                    InputStream is = url.openStream();
+                                    parser.setInput(new InputStreamReader(is, "UTF-8"));
+                                    String tagName = "";
+                                    int eventType = parser.getEventType();
 
-                                InputStream is = url.openStream();
-                                parser.setInput(new InputStreamReader(is, "UTF-8"));
-                                String tagName = "";
-                                int eventType = parser.getEventType();
-
-                                while (eventType != XmlPullParser.END_DOCUMENT) {
-                                    switch (eventType) {
-                                        //태그가 시작
-                                        case XmlPullParser.START_TAG:
-                                            tagName=parser.getName();
-                                            if (parser.getName().equals("item")) {
-                                                //객체 생성
-                                            }
-                                            break;
-                                        //태그의 끝
-                                        case XmlPullParser.END_TAG:
-                                            if (parser.getName().equals("item")) {
-                                                //객체를 리스트에 추가
-                                            }
-                                            break;
-                                        //태그 안의 텍스트
-                                        case XmlPullParser.TEXT:
-                                            switch(tagName) {
-                                                case "arrprevstationcnt":
-                                                    break;
-                                                case "arrtime": {
-                                                    arrTime = Integer.parseInt(parser.getText());
-                                                    break;
+                                    while (eventType != XmlPullParser.END_DOCUMENT) {
+                                        switch (eventType) {
+                                            //태그가 시작
+                                            case XmlPullParser.START_TAG:
+                                                tagName=parser.getName();
+                                                if (parser.getName().equals("item")) {
+                                                    //객체 생성
                                                 }
-                                                case "nodeid":
-                                                case "nodenm":
-                                                case "routeid":
-                                                case "routeno":
-                                                case "routetp":
-                                                case "vehicletp":
-                                                    break;
-                                            }
-                                            break;
+                                                break;
+                                            //태그의 끝
+                                            case XmlPullParser.END_TAG:
+                                                if (parser.getName().equals("item")) {
+                                                    //객체를 리스트에 추가
+                                                }
+                                                break;
+                                            //태그 안의 텍스트
+                                            case XmlPullParser.TEXT:
+                                                switch(tagName) {
+                                                    case "arrprevstationcnt":
+                                                        break;
+                                                    case "arrtime": {
+                                                        arrTime = Integer.parseInt(parser.getText());
+                                                        break;
+                                                    }
+                                                    case "nodeid":
+                                                    case "nodenm":
+                                                    case "routeid":
+                                                    case "routeno":
+                                                    case "routetp":
+                                                    case "vehicletp":
+                                                        break;
+                                                }
+                                                break;
+                                        }
+                                        //다음으로 이동
+                                        eventType = parser.next();
                                     }
-                                    //다음으로 이동
-                                    eventType = parser.next();
-                                }
 
-                                publishProgress(i, j, arrTime);
+                                    publishProgress(i, j, arrTime);
+                                }
                             }
 
                             Log.d("API THREAD : ", "START[" + i + "]");
@@ -431,6 +433,15 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
             int time = values[2];
 
             Notice notice = adapter.getItem(position);
+            String arrTime = Integer.toString(time / 60);
+            notice.setArrTimes(routeNo, arrTime);
+            recyclerView.setAdapter(adapter);
+
+            if (!notice.isFlag() && time <= notice.getNotiTime() * 60) {
+                String msg = "[" + notice.getNodeName() +  "]" + notice.getRouteName(routeNo) + "번 버스가 " + arrTime + "분 후 도착합니다.";
+                Notification(notice.getNotiName(), msg);
+                notice.setFlag(true);
+            }
         }
 
         @Override

@@ -41,7 +41,10 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.ViewHolder
         public void setItem(Notice item) {
             notiName.setText(item.getNotiName());
             nodeName.setText(item.getNodeName());
-            route1.setText(item.getNodeName());
+            route1.setText(item.getRouteName(1));
+            route2.setText(item.getRouteName(2));
+            time1.setText(item.getArrTimes(1));
+            time2.setText(item.getArrTimes(2));
             if (item.isOn()) {
                 isOn.setChecked(true);
             } else {
