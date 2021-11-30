@@ -166,8 +166,16 @@ public class RouteSelector extends AppCompatActivity {
             finish();
         }
 
-    }
 
+    }
+    public void OnClose(View v){
+        selectedRouteNameList = new ArrayList<String>();
+        selectedRouteIdList = new ArrayList<String>();
+        bandy.close();
+
+        //액티비티(팝업) 닫기
+        finish();
+    }
 
     public class myDBHelper extends SQLiteOpenHelper {
         @Override

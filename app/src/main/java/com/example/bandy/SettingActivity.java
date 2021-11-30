@@ -330,12 +330,10 @@ public class SettingActivity extends AppCompatActivity {
         });
 
 
-
-
         btnCreate.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                if (RouteIdList == null || title == null || NODENAME == null) {
+                if (RouteIdList.size() == 0 || RouteIdList == null || title == null || NODENAME == null || startAt == null || endAt == null || days == 0) {
                     Toast.makeText(getApplicationContext(), "모두 입력해주세요", Toast.LENGTH_SHORT).show();
                 } else {
                     if(title.trim().isEmpty()) {
@@ -344,7 +342,7 @@ public class SettingActivity extends AppCompatActivity {
                         if (days > 127){
                             days = 127;
                         }else if(days < 0){
-                            days = 0;
+                            days = 127;
                         }
 
                         bandy = alarmHelper.getWritableDatabase();

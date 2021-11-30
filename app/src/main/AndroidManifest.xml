@@ -44,7 +44,6 @@
             android:name=".RouteSelector"
             android:theme="@style/Theme.AppCompat.Light"
             />
-
     </application>
 
 </manifest>
