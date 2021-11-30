@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class PreparationAdapter extends BaseAdapter {
-
+    private int checkedCount;
     private ArrayList<PreparationItem> list;
     public PreparationAdapter(ArrayList<PreparationItem> i) {
         list = i;
@@ -24,6 +24,16 @@ public class PreparationAdapter extends BaseAdapter {
     @Override
     public int getCount() {
         return list.size();
+    }
+
+    public int getCheckedCount(){
+        checkedCount = 0;
+        for(int i = 0; i < getCount() ; i ++){
+            if(((PreparationItem) getItem(i)).isChecked()){
+                checkedCount+=1;
+            }
+        }
+        return checkedCount;
     }
 
 
@@ -57,6 +67,7 @@ public class PreparationAdapter extends BaseAdapter {
                 //체크박스 클릭
                 boolean newState = !list.get(p).isChecked();
                 list.get(p).checked = newState;
+
                 Log.d("checked",list.get(p).ItemStringid);
                 Log.d("checked",list.get(p).ItemStringname);
             }

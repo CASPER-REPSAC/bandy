@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,7 @@ public class RouteSelector extends AppCompatActivity {
 
     public ArrayList<String> selectedRouteIdList;
     public ArrayList<String> selectedRouteNameList;
+    public int selectedRouteCount = 0;
 
     private myDBHelper busHelper = new myDBHelper(this);;
     SQLiteDatabase bandy;
@@ -78,7 +80,7 @@ public class RouteSelector extends AppCompatActivity {
 
 
         //정류장 번호를 지나가는 버스 목록 받아오기
-        cursor = bandy.rawQuery("Select nodeName, routeId, routeName from RouteInNode where nodeid='" + selectedNodeId + "';", null);
+        cursor = bandy.rawQuery("Select nodeName, routeId, routeName from RouteInNode where nodeid = ?;",new String[] {selectedNodeId});
         cursor.moveToFirst();
         searchedRouteCount = cursor.getCount();
         selectedNodeName = cursor.getString(0);
@@ -124,40 +126,46 @@ public class RouteSelector extends AppCompatActivity {
         selectedRouteIdList = new ArrayList<String>();
 
         Log.d("selected1", "close");
-        for(int i = 0; i < searchedRouteCount;i++) {
 
-            //받아온 버스 중 체크박스로 체크된 것들을 리스트로 옮김.
-            if(mAdapter.isChecked(i)){
-                PreparationItem saver = (PreparationItem) mAdapter.getItem(i);
-                selectedRouteNameList.add(saver.ItemStringname);
-                selectedRouteIdList.add(saver.ItemStringid);
+        if (mAdapter.getCheckedCount() > 2) {
+            Toast.makeText(getApplicationContext(), "노선은 2개까지 설정가능합니다.", Toast.LENGTH_SHORT).show();
+        } else {
+            for(int i = 0; i < searchedRouteCount;i++) {
 
+                //받아온 버스 중 체크박스로 체크된 것들을 리스트로 옮김.
+                if(mAdapter.isChecked(i)){
+                    PreparationItem saver = (PreparationItem) mAdapter.getItem(i);
+                    selectedRouteNameList.add(saver.ItemStringname);
+                    selectedRouteIdList.add(saver.ItemStringid);
+
+                }
             }
+
+
+            for(int i = 0;i < selectedRouteIdList.size();i++){
+                Log.d("selected1", selectedRouteIdList.get(i));
+                Log.d("selected2", selectedRouteNameList.get(i));
+            }
+
+
+            //체크박스에서 선택된 버스의 id, 노선번호 전달하기
+            Intent intent = new Intent(this, SettingActivity.class);
+            intent.putExtra("RouteId_List", selectedRouteIdList);
+            intent.putExtra("RouteName_List",selectedRouteNameList);
+
+            for(int i = 0; i< selectedRouteIdList.size();i++){
+                Log.d("before",selectedRouteIdList.get(i));
+                Log.d("before",selectedRouteNameList.get(i));
+            }
+            setResult(RESULT_OK, intent);
+
+            //디비 닫기
+            bandy.close();
+
+            //액티비티(팝업) 닫기
+            finish();
         }
 
-
-        for(int i = 0;i < selectedRouteIdList.size();i++){
-            Log.d("selected1", selectedRouteIdList.get(i));
-            Log.d("selected2", selectedRouteNameList.get(i));
-        }
-
-
-        //체크박스에서 선택된 버스의 id, 노선번호 전달하기
-        Intent intent = new Intent(this, SettingActivity.class);
-        intent.putExtra("RouteId_List", selectedRouteIdList);
-        intent.putExtra("RouteName_List",selectedRouteNameList);
-
-        for(int i = 0; i< selectedRouteIdList.size();i++){
-            Log.d("before",selectedRouteIdList.get(i));
-            Log.d("before",selectedRouteNameList.get(i));
-        }
-        setResult(RESULT_OK, intent);
-
-        //디비 닫기
-        bandy.close();
-
-        //액티비티(팝업) 닫기
-        finish();
     }
 
 

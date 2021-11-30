@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
     private static final String CHANNEL_ID = "channel";
     private static final String CHANNEL_NAME = "Channel";
     private static final String ROOT_DIR = "/data/data/com.example.bandy/databases/";
-    private final int[] check = {1, 2, 4, 8, 16, 32, 64};
+    private final int[] check = {1, 64, 32, 16, 8, 4, 2};
 
     private TextView tvDate, tvTime;
     private ImageView ivMenu, ivWeather;
@@ -123,11 +123,11 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         adapter.setOnItemClickListener(new NoticeAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View v, int pos) {
-                // 실행 내용
                 Intent intent = new Intent(v.getContext(), SettingActivity.class);
                 intent.putExtra("MODE", false);
                 intent.putExtra("notiId", adapter.items.get(pos).getNotiId());
                 resultLauncher.launch(intent);
+                setRecyclerView();
             }
         });
 
@@ -185,11 +185,12 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
     }
 
     public void setRecyclerView() {
+        Log.d("SetRecyclerView : ", "START");
+        adapter.clear();
+        recyclerView.setAdapter(adapter);
         sqlDB = dbHelper.getReadableDatabase();
         Cursor cursor;
         cursor = sqlDB.rawQuery("SELECT * FROM Notice;", null);
-
-        adapter.clear();
 
         if (cursor.getCount() <= 0) {
             // todo
@@ -222,6 +223,7 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
 
         Cursor routeCursor = null;
         int cnt = adapter.getItemCount();
+        Log.d("cnt ", String.valueOf(cnt));
         for (int i = 0; i < cnt; i++) {
             Notice curItem = adapter.getItem(i);
             routeCursor = sqlDB.rawQuery("SELECT routeID, routeName FROM RouteInNotice WHERE notiId=" + curItem.getNotiId() + ";", null);
@@ -305,6 +307,7 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
 
             while (!isCancelled()) {
                 try {
+                    Log.d("Check Task : ", "START");
                     Calendar calendar = Calendar.getInstance();
                     int nWeek = calendar.get(Calendar.DAY_OF_WEEK);
 
@@ -321,52 +324,55 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
                         Date startTime = timeFormat.parse(item.getStartAt());
                         Date endTime = timeFormat.parse(item.getEndAt());
 
+                        // 설정된 요일 가져오기
                         int days = item.getDays();
-                        boolean[] set = new boolean[7];
-                        for (int i = 0; i < 7; i++) {
-                            set[i] = false;
-                        }
-
-                        for (int i = 0; i < 7; i++) {
-                            if ((check[i] & days) == 1) {
-                                set[i] = true;
-                            }
-                        }
-
                         boolean setDay = false;
 
-                        if (nWeek == 1) {
-                            if (set[6]) {
+                        if ((days & 64) >> 6 == 1) {
+                            // 월
+                            if (nWeek == 2) {
                                 setDay = true;
                             }
-                        } else if (nWeek == 2) {
-                            if (set[0]) {
+                        }
+                        if ((days & 32) >> 5 == 1) {
+                            // 화
+                            if (nWeek == 3) {
                                 setDay = true;
                             }
-                        } else if (nWeek == 3) {
-                            if (set[1]) {
+                        }
+                        if ((days & 16) >> 4 == 1) {
+                            // 수
+                            if (nWeek == 4) {
                                 setDay = true;
                             }
-                        } else if (nWeek == 4) {
-                            if (set[2]) {
+                        }
+                        if ((days & 8) >> 3 == 1) {
+                            // 목
+                            if (nWeek == 5) {
                                 setDay = true;
                             }
-                        } else if (nWeek == 5) {
-                            if (set[3]) {
+                        }
+                        if ((days & 4) >> 2 == 1) {
+                            // 금
+                            if (nWeek == 6) {
                                 setDay = true;
                             }
-                        } else if (nWeek == 6) {
-                            if (set[4]) {
+                        }
+                        if ((days & 2) >> 1 == 1) {
+                            // 토
+                            if (nWeek == 7) {
                                 setDay = true;
                             }
-                        } else if (nWeek == 7) {
-                            if (set[5]) {
+                        }
+                        if ((days & 1) == 1) {
+                            // 일
+                            if (nWeek == 1) {
                                 setDay = true;
                             }
                         }
 
                         if (now.after(startTime) && now.before(endTime) && setDay && item.isOn()) {
-                            Log.e("CHECK TIME if : ", "IN");
+                            Log.d("알람 동작 시간 : ", "START");
                             nodeId = item.getNodeId();
                             String[] routes = item.getRouteIds();
                             for (int routeNo = 0; routeNo < 2; routeNo++) {
@@ -543,8 +549,6 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
             pty = 0;
             ptyCount = 0;
             while (!isCancelled()) {
-
-                Log.d("WDoInBackGround : ", "START");
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
                 Date date = Calendar.getInstance().getTime();
                 base_date = dateFormat.format(date);
@@ -641,11 +645,8 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
 
                 // sleep
                 try {
-                    Log.d("WEATHER SLEEP : ", "START");
                     Thread.sleep(3600000);
-                    Log.d("WEATHER SLEEP : ", "END");
                 } catch (InterruptedException e) {
-                    Log.d("WBackground Exception:", e.getMessage());
                     e.printStackTrace();
                 }
             }

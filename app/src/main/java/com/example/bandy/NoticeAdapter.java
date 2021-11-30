@@ -31,7 +31,6 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.ViewHolder
     }
 
 
-
     ArrayList<Notice> items = new ArrayList<>();
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -122,6 +121,9 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.ViewHolder
 
     @Override
     public int getItemCount() {
+        if (items.size() == 0) {
+            clear();
+        }
         return items.size();
     }
 

@@ -17,6 +17,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -46,11 +48,19 @@ public class SettingActivity extends AppCompatActivity {
     TextView nodeName;
     TextView nodeID;
 
+    //alarmMode
+    //true : create
+    //false : modify
+    boolean mode;
+    int notiId;
+    int isOn;
+
+
     //for Title
-    TextView titleView;
     String title;
-    boolean isSetTitle = false;
     EditText inputTitle;
+    boolean isSetTitle = false;
+
 
     //for days
     Integer days = 0;
@@ -58,6 +68,8 @@ public class SettingActivity extends AppCompatActivity {
 
 
     //for time
+    TextView btnStartTime;
+    TextView btnEndTime;
     String startAt;
     String endAt;
     Integer notiTime = 10;
@@ -65,6 +77,7 @@ public class SettingActivity extends AppCompatActivity {
 
 
     //for NodeSelect Intent
+    TextView nodeView;
     Intent INTENTRESULT;
     String NODEID = null;
     String NODENAME = null;
@@ -74,9 +87,13 @@ public class SettingActivity extends AppCompatActivity {
     Intent RouteIntentResult;
     ArrayList<String> RouteIdList = new ArrayList<String>();
     ArrayList<String> RouteNameList = new ArrayList<String>();
+    TextView busView ;
+
 
     Button btnCreate;
+    Button btnDelete;
     Button btnCancel;
+
 
     private myDBHelper alarmHelper = new myDBHelper(this);;
     SQLiteDatabase bandy;
@@ -98,22 +115,38 @@ public class SettingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_setting);
 
 
+        //textView 미리 세팅
+        nodeView = (TextView) findViewById(R.id.startPointSelector);
+
+        //radio 미리 세팅
+        notiRadio = findViewById(R.id.notiTimeGroup);
+
         //Title editText
-        titleView = findViewById(R.id.routeTitle);
         inputTitle = (EditText) findViewById(R.id.routeTitle);
-        inputTitle.setOnKeyListener(new View.OnKeyListener(){
+        inputTitle.addTextChangedListener(new TextWatcher() {
             @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event){
-                switch (keyCode){
-                    case KeyEvent.KEYCODE_ENTER:
-                        titleView.setText(inputTitle.getText());
-                        title = inputTitle.getText().toString();
-                        Log.d("title",title);
-                        break;
-                }
-                return true;
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                title = inputTitle.getText().toString();
+                Log.d("title",title);
             }
         });
+
+
+        //Time Setting Buttons
+        Button btnSetStartTime = (Button) findViewById(R.id.btnSetStartTime);
+        Button btnSetEndTime = (Button) findViewById(R.id.btnSetEndTime);
+        btnStartTime = (TextView)findViewById(R.id.btnSetStartTime);
+        btnEndTime = (TextView)findViewById(R.id.btnSetEndTime);
 
 
         //days Selector
@@ -124,6 +157,53 @@ public class SettingActivity extends AppCompatActivity {
         CheckBox fri = (CheckBox)findViewById(R.id.friSelector);
         CheckBox sat = (CheckBox)findViewById(R.id.saturSelector);
         CheckBox sun = (CheckBox)findViewById(R.id.sunSelector);
+
+
+        //bus TextView
+        busView =(TextView)findViewById(R.id.busSelector);
+
+
+        //button End
+        btnCreate = (Button) findViewById(R.id.alarmCreate);
+        btnDelete = (Button)findViewById(R.id.alarmDelete);
+        btnCancel = (Button) findViewById(R.id.alarmCancel);
+
+
+        //for modify Check
+        Intent modeIntent = getIntent();
+        mode = modeIntent.getBooleanExtra("MODE",true);
+        if (mode == false) {
+
+            btnDelete.setEnabled(true);
+
+            notiId = modeIntent.getIntExtra("notiId", -1);
+            bandy = alarmHelper.getReadableDatabase();
+            cursor = bandy.rawQuery("Select * from Notice where notiId=" + Integer.toString(notiId) + ";", null);
+            cursor.moveToFirst();
+            if (notiId != cursor.getInt(0)) {
+                Toast.makeText(getApplicationContext(), "알람이 없습니다!", Toast.LENGTH_SHORT).show();
+                finish();
+            } else {
+                title = cursor.getString(1); //notiname
+                isSetTitle = true;
+                inputTitle.setText(title, TextView.BufferType.EDITABLE);
+
+                NODEID = cursor.getString(2); //nodeid
+                NODENAME = cursor.getString(3);//nodename
+                nodeView.setText(NODENAME);
+                notiTime = cursor.getInt(4);//notitime int
+                startAt = cursor.getString(5);//startat
+                endAt = cursor.getString(6);//endat
+                btnStartTime.setText(startAt);
+                btnEndTime.setText(endAt);
+                days = cursor.getInt(7);//days int
+                daysChecker(days, mode, mon, tues, wed, thur, fri, sat, sun);
+                isOn = cursor.getInt(8);//is On int
+                RouteIdList = null;
+                RouteNameList = null;
+            }
+        }
+
         //monday : 64
         mon.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -216,11 +296,6 @@ public class SettingActivity extends AppCompatActivity {
             }
         });
 
-        //Time Setting Buttons
-        Button btnSetStartTime = (Button) findViewById(R.id.btnSetStartTime);
-        Button btnSetEndTime = (Button) findViewById(R.id.btnSetEndTime);
-        TextView btnStartTime = findViewById(R.id.btnSetStartTime);
-        TextView btnEndTime = findViewById(R.id.btnSetEndTime);
 
         //Start Point View
         //startPointRe = findViewById(R.id.startPointView);
@@ -264,19 +339,18 @@ public class SettingActivity extends AppCompatActivity {
 
 
         //for notiTime
-        notiRadio = findViewById(R.id.notiTimeGroup);
         notiRadio.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
                 switch (i){
+                    case R.id.min5:
+                        notiTime = 5;
+                        break;
                     case R.id.min10:
                         notiTime = 10;
                         break;
                     case R.id.min15:
                         notiTime = 15;
-                        break;
-                    case R.id.min20:
-                        notiTime = 20;
                         break;
                 }
             }
@@ -284,14 +358,11 @@ public class SettingActivity extends AppCompatActivity {
 
 
 
-        //for create
-        btnCreate = (Button) findViewById(R.id.alarmCreate);
-        btnCancel = (Button) findViewById(R.id.alarmCancel);
 
         btnCreate.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                if(RouteIdList == null || !isSetTitle) {
+                if(RouteIdList == null || title.trim().isEmpty()) {
                     Toast.makeText(getApplicationContext(), "모두 입력해주세요", Toast.LENGTH_SHORT).show();
                 }else{
                     if (days > 127){
@@ -310,15 +381,23 @@ public class SettingActivity extends AppCompatActivity {
                     values.put(alarmHelper.endAt,endAt);
                     values.put(alarmHelper.days,days);
                     values.put(alarmHelper.isOn,1);
-                    bandy.insert(alarmHelper.Notice,null,values);
+                    if(mode) {
+                        bandy.insert(alarmHelper.Notice, null, values);
+                        //bandy = alarmHelper.getReadableDatabase();
+                        cursor = bandy.rawQuery("Select notiId from Notice Order by notiId DESC limit 1;",null);
+                        cursor.moveToFirst();
+                        notiId = cursor.getInt(0);
+                        Log.d("notiId", String.valueOf(notiId));
 
-                    bandy = alarmHelper.getReadableDatabase();
-                    cursor = bandy.rawQuery("Select notiId from Notice Order by notiId DESC limit 1;",null);
-                    cursor.moveToFirst();
-                    Integer notiId = cursor.getInt(0);
-                    Log.d("notiId", notiId.toString());
 
-                    bandy = alarmHelper.getWritableDatabase();
+
+                    }else{
+                        bandy.update(alarmHelper.Notice,values,"notiId = ?",new String[] { Integer.toString(notiId)} ); //알람 업데이트
+                        for(int i = 0; i < RouteIdList.size() ;i++) {
+                            bandy.delete(alarmHelper.RouteInNotice,  "notiId = ?", new String[]{Integer.toString(notiId)}); // 알람 노섬 삭제
+                        }
+                    }
+
 
                     Log.d("title",title);
                     Log.d("days",days.toString());
@@ -339,6 +418,7 @@ public class SettingActivity extends AppCompatActivity {
                     setResult(RESULT_OK, intent);
                     finish();
                 }
+
             }
 
         });
@@ -350,22 +430,59 @@ public class SettingActivity extends AppCompatActivity {
                 finish();
             }
         });
+        btnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bandy = alarmHelper.getWritableDatabase();
+                bandy.delete(alarmHelper.RouteInNotice,  "notiId = ?", new String[]{Integer.toString(notiId)}); // 알람 노섬 삭제
+                bandy.delete(alarmHelper.Notice,  "notiId = ?", new String[]{Integer.toString(notiId)}); // 알람 노섬 삭제
+                bandy.close();
+                finish();
+            }
+        });
     }
 
+    private void daysChecker(Integer days, boolean mode, CheckBox mon, CheckBox tues, CheckBox wed, CheckBox thur, CheckBox fri, CheckBox sat, CheckBox sun) {
+        if(!mode){
+            if ((days & 64) >> 6 == 1){
+                mon.setChecked(true);
+            }
+            if ((days & 32) >> 5 == 1){
+                tues.setChecked(true);
+            }
+            if ((days & 16) >> 4 == 1){
+                wed.setChecked(true);
+            }
+            if ((days & 8) >> 3 == 1){
+                thur.setChecked(true);
+            }
+            if ((days & 4) >> 2 == 1){
+                fri.setChecked(true);
+            }
+            if ((days & 2) >> 1 == 1){
+                sat.setChecked(true);
+            }
+            if ((days & 1) == 1){
+                sun.setChecked(true);
+            }
+        }
+    }
+
+
+    /*
     //타이틀 입력 후 엔터키 확인하기
     public boolean onKey(View v, int keyCode, KeyEvent event){
         if(keyCode == KeyEvent.KEYCODE_ENTER){
             switch (v.getId()){
                 case R.id.routeTitle:
                     title = inputTitle.toString();
-                    isSetTitle = true;
                     Log.d("title",title);
                     break;
             }
             return true;
         }
         return false;
-    }
+    }*/
 
     public void mOnPopupClick(View v){
         //데이터 담아서 팝업(액티비티) 호출
@@ -392,6 +509,8 @@ public class SettingActivity extends AppCompatActivity {
                         if (NODEID == null || result == null) {
                             Log.d("Result Node Error", "No data");
                         } else {
+                            nodeView = (TextView) findViewById(R.id.startPointSelector);
+                            nodeView.setText(NODENAME);
                             Log.d("Result Node Check", NODENAME);
                         }
                     }
@@ -425,11 +544,15 @@ public class SettingActivity extends AppCompatActivity {
 
                         RouteIdList = RouteIntentResult.getStringArrayListExtra("RouteId_List");
                         RouteNameList = RouteIntentResult.getStringArrayListExtra("RouteName_List");
-
+                        String bView = "";
                         for(int i = 0; i < RouteIdList.size() ;i++){
                             Log.d("Routeid",RouteIdList.get(i));
                             Log.d("Routename",RouteNameList.get(i));
+
+                            bView = bView + RouteNameList.get(i) + " ";
                         }
+
+                        busView.setText(bView);
                     }
 
                 }});
@@ -464,6 +587,11 @@ public class SettingActivity extends AppCompatActivity {
         @Override
         public void onUpgrade(SQLiteDatabase db, int i, int i1) {
 
+        }
+
+        public void onDelete(SQLiteDatabase db, int notiId){
+            final String deleteNoticeQuery = "DELETE FROM Notice WHERE notiId =";
+            db.execSQL(deleteNoticeQuery + Integer.toString(notiId));
         }
 
         public myDBHelper(Context context){
