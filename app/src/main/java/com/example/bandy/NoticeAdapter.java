@@ -1,5 +1,6 @@
 package com.example.bandy;
 
+import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.w3c.dom.Text;
@@ -83,8 +85,40 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.ViewHolder
             nodeName.setText(item.getNodeName());
             route1.setText(item.getRouteName(0));
             route2.setText(item.getRouteName(1));
-            time1.setText(item.getArrTimes(0));
-            time2.setText(item.getArrTimes(1));
+            if (!item.getArrTimes(0).equals("")) {
+                String str = item.getArrTimes(0) + "분전";
+                time1.setText(str);
+            }
+            if (!item.getArrTimes(1).equals("")) {
+                String str = item.getArrTimes(1) + "분전";
+                time2.setText(str);
+            }
+
+            boolean[] day = item.getDay();
+            if (day[0]) {
+                mon.setTextColor(0xAA003788);
+            }
+            if (day[1]) {
+                tues.setTextColor(0xAA003788);
+            }
+            if (day[2]) {
+                wed.setTextColor(0xAA003788);
+            }
+            if (day[3]) {
+                thur.setTextColor(0xAA003788);
+            }
+            if (day[4]) {
+                fri.setTextColor(0xAA003788);
+            }
+            if (day[5]) {
+                sat.setTextColor(0xAA003788);
+            }
+            if (day[6]) {
+                sun.setTextColor(0xAA003788);
+            }
+
+
+
             if (item.isOn()) {
                 isOn.setChecked(true);
             } else {

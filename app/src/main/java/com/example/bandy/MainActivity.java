@@ -1,5 +1,6 @@
 package com.example.bandy;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -97,8 +98,9 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         gpsConverter = new GpsConverter();
         dbHelper = new myDBHelper(this);
 
+        // DB 있는지 체크
         try {
-            boolean bResult = isCheckDB(this); // DB가 있는지?
+            boolean bResult = isCheckDB(this);
             Log.d("Bandy DB : ", "DB Check="+bResult);
             if(!bResult){ // DB가 없으면 복사
                 setDB(this);
@@ -123,6 +125,9 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         adapter.setOnItemClickListener(new NoticeAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View v, int pos) {
+                if (checkTask != null) {
+                    checkTask.cancel(true);
+                }
                 Intent intent = new Intent(v.getContext(), SettingActivity.class);
                 intent.putExtra("MODE", false);
                 intent.putExtra("notiId", adapter.items.get(pos).getNotiId());
@@ -134,6 +139,9 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         ivMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (checkTask != null) {
+                    checkTask.cancel(true);
+                }
                 Intent intent = new Intent(getApplicationContext(), SettingActivity.class);
                 intent.putExtra("MODE", true);
                 resultLauncher.launch(intent);
@@ -150,7 +158,6 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         if (file.exists()) {
             return true;
         }
-
         return false;
     }
 
@@ -186,6 +193,7 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
 
     public void setRecyclerView() {
         Log.d("SetRecyclerView : ", "START");
+
         adapter.clear();
         recyclerView.setAdapter(adapter);
         sqlDB = dbHelper.getReadableDatabase();
@@ -193,18 +201,11 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         cursor = sqlDB.rawQuery("SELECT * FROM Notice;", null);
 
         if (cursor.getCount() <= 0) {
-            // todo
-            // db 에 저장된 알림이 없음
-            // 알림을 생성하라는 View 띄워주기
             Toast.makeText(getApplicationContext(), "알림을 생성해주세요!", Toast.LENGTH_LONG).show();
             cursor.close();
             return;
         } else {
             while (cursor.moveToNext()) {
-                // int notiId, String notiName,
-                // String nodeId, String nodeName,
-                // int notiTime, String startAt, String endAt,
-                // int days, boolean isOn
                 Notice notice = new Notice(
                         cursor.getInt(0),           //notiId    알림 ID
                         cursor.getString(1),        //notiName  알림 이름
@@ -236,9 +237,42 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
                 routeIds[j] = routeCursor.getString(0);
                 routeNames[j] = routeCursor.getString(1);
             }
-
             curItem.setRouteIds(routeIds);
             curItem.setRouteNames(routeNames);
+        }
+
+        for(int noticeNo = 0; noticeNo < adapter.getItemCount(); noticeNo++) {
+            Notice item = adapter.getItem(noticeNo);
+
+            int days = item.getDays();
+            if ((days & 64) >> 6 == 1) {
+                // 월
+                item.setDay(true, 0);
+            }
+            if ((days & 32) >> 5 == 1) {
+                // 화
+                item.setDay(true, 1);
+            }
+            if ((days & 16) >> 4 == 1) {
+                // 수
+                item.setDay(true, 2);
+            }
+            if ((days & 8) >> 3 == 1) {
+                // 목
+                item.setDay(true, 3);
+            }
+            if ((days & 4) >> 2 == 1) {
+                // 금
+                item.setDay(true, 4);
+            }
+            if ((days & 2) >> 1 == 1) {
+                // 토
+                item.setDay(true, 5);
+            }
+            if ((days & 1) == 1) {
+                // 일
+                item.setDay(true, 6);
+            }
         }
 
         recyclerView.setAdapter(adapter);
@@ -307,14 +341,13 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
 
             while (!isCancelled()) {
                 try {
+                    Thread.sleep(10000); // 10초 sleep
                     Log.d("Check Task : ", "START");
                     Calendar calendar = Calendar.getInstance();
                     int nWeek = calendar.get(Calendar.DAY_OF_WEEK);
 
                     int cnt = adapter.getItemCount();
-                    Thread.sleep(10000); // 10초 sleep
-
-                    // 1. 전체 item 순회
+                    // 전체 item 순회
                     for(int noticeNo = 0; noticeNo < cnt; noticeNo++) {
                         Notice item = adapter.getItem(noticeNo);
                         // 현재 시간과 설정 시간대 사이 체크
@@ -385,7 +418,6 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
                                     urlBuilder.append("&" + URLEncoder.encode("nodeId", "UTF-8") + "=" + nodeId);
                                     urlBuilder.append("&" + URLEncoder.encode("routeId", "UTF-8") + "=" + routeId);
 
-
                                     URL url = new URL(urlBuilder.toString());
                                     xmlPullParserFactory = XmlPullParserFactory.newInstance();
                                     parser = xmlPullParserFactory.newPullParser();
@@ -399,7 +431,7 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
                                         switch (eventType) {
                                             //태그가 시작
                                             case XmlPullParser.START_TAG:
-                                                tagName=parser.getName();
+                                                tagName = parser.getName();
                                                 if (parser.getName().equals("item")) {
                                                     //객체 생성
                                                 }
@@ -412,7 +444,7 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
                                                 break;
                                             //태그 안의 텍스트
                                             case XmlPullParser.TEXT:
-                                                switch(tagName) {
+                                                switch (tagName) {
                                                     case "arrprevstationcnt":
                                                         break;
                                                     case "arrtime": {
@@ -432,7 +464,6 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
                                         //다음으로 이동
                                         eventType = parser.next();
                                     }
-
                                     publishProgress(noticeNo, routeNo, arrTime);
                                 }
                             }
@@ -442,7 +473,6 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
                     e.printStackTrace();
                 }
             }
-
             return null;
         }
 
@@ -455,21 +485,27 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
             int time = values[2];
 
             Notice notice = adapter.getItem(noticeNo);
-            String arrTime = Integer.toString(time / 60);
-            notice.setArrTimes(routeNo, arrTime + "분전");
-            //recyclerView.notify();
+            int resTime = time / 60;
+            String resTimeStr = Integer.toString(resTime);
+            String beforeTimeStr = notice.getArrTimes(routeNo);
+            if (!beforeTimeStr.equals("")) {
+                if (Integer.parseInt(notice.getArrTimes(routeNo)) < resTime) {
+                    notice.setCall(false, routeNo);
+                }
+            }
+            notice.setArrTimes(routeNo, resTimeStr);
             recyclerView.setAdapter(adapter);
-
-            if (!notice.isFlag() && time <= notice.getNotiTime() * 60) {
-                String msg = "[" + notice.getNodeName() +  "]" + notice.getRouteName(routeNo) + "번 버스가 " + arrTime + "분 후 도착합니다.";
+            if (!notice.isCall(routeNo) && resTime <= notice.getNotiTime()) {
+                String msg = "[" + notice.getNodeName() +  "]" + notice.getRouteName(routeNo) + "번 버스가 " + resTimeStr + "분 후 도착합니다.";
                 Notification(notice.getNotiName(), msg);
-                notice.setFlag(true);
+                notice.setCall(true, routeNo);
             }
         }
 
         @Override
         protected void onCancelled() {
             super.onCancelled();
+            Log.d("Check Task : ", "Cancel");
         }
     }
 
@@ -704,6 +740,7 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
     }
 
     // Location Manage Method
+    @SuppressLint("MissingPermission")
     private void startLocationService() {
         // Location 객체 참조하기
         manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -750,17 +787,14 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
         AutoPermissions.Companion.parsePermissions(this, requestCode, permissions, this);
     }
 
     @Override
     public void onDenied(int i, String[] strings) {
-        // Toast.makeText(this, "permissions denied : " + strings.length, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onGranted(int i, String[] strings) {
-        // Toast.makeText(this, "permissions granted : " + strings.length, Toast.LENGTH_SHORT).show();
     }
 }

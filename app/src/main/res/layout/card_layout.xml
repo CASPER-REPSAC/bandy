@@ -54,7 +54,6 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="5dp"
-                        android:text="버스번호1"
                         android:textColor="@color/darkBlue"
                         android:textSize="15sp"
                         android:textStyle="bold" />
@@ -65,7 +64,6 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="5dp"
-                        android:text="정보없음"
                         android:textColor="@color/darkBlue"
                         android:textSize="15sp"
                         android:textStyle="bold" />
@@ -83,7 +81,6 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="5dp"
-                        android:text="버스번호2"
                         android:textColor="@color/darkBlue"
                         android:textSize="15sp"
                         android:textStyle="bold" />
@@ -94,7 +91,6 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="5dp"
-                        android:text="정보없음"
                         android:textColor="@color/darkBlue"
                         android:textSize="15sp"
                         android:textStyle="bold" />

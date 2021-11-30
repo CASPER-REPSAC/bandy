@@ -15,7 +15,8 @@ public class Notice {
     private String endAt;
     private int days;
     private boolean isOn;
-    private boolean flag = false;
+    private boolean[] call = new boolean[2];
+    private boolean[] day = new boolean[7];
 
     public Notice(int notiId, String notiName, String nodeId, String nodeName, int notiTime, String startAt, String endAt, int days, boolean isOn) {
         this.notiId = notiId;
@@ -27,6 +28,8 @@ public class Notice {
         this.endAt = endAt;
         this.days = days;
         this.isOn = isOn;
+        call[0] = false;
+        call[1] = false;
     }
 
     public int getNotiId() {
@@ -129,11 +132,19 @@ public class Notice {
         this.isOn = isOn;
     }
 
-    public boolean isFlag() {
-        return flag;
+    public boolean isCall(int index) {
+        return call[index];
     }
 
-    public void setFlag(boolean flag) {
-        this.flag = flag;
+    public void setCall(boolean call, int index) {
+        this.call[index] = call;
+    }
+
+    public boolean[] getDay() {
+        return day;
+    }
+
+    public void setDay(boolean day, int index) {
+        this.day[index] = day;
     }
 }

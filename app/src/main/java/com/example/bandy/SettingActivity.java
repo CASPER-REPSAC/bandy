@@ -1,12 +1,5 @@
 package com.example.bandy;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.Manifest;
 import android.app.Activity;
 import android.app.TimePickerDialog;
@@ -20,7 +13,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -30,9 +22,14 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.MapView;
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
 
-import org.w3c.dom.Node;
+import com.google.android.gms.maps.MapView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,13 +56,10 @@ public class SettingActivity extends AppCompatActivity {
     //for Title
     String title;
     EditText inputTitle;
-    boolean isSetTitle = false;
-
 
     //for days
     Integer days = 0;
     Integer daysCheck = 0;
-
 
     //for time
     TextView btnStartTime;
@@ -88,7 +82,6 @@ public class SettingActivity extends AppCompatActivity {
     ArrayList<String> RouteIdList = new ArrayList<String>();
     ArrayList<String> RouteNameList = new ArrayList<String>();
     TextView busView ;
-
 
     Button btnCreate;
     Button btnDelete;
@@ -126,14 +119,10 @@ public class SettingActivity extends AppCompatActivity {
         inputTitle.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
             }
-
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
             }
-
             @Override
             public void afterTextChanged(Editable editable) {
                 title = inputTitle.getText().toString();
@@ -141,13 +130,11 @@ public class SettingActivity extends AppCompatActivity {
             }
         });
 
-
         //Time Setting Buttons
         Button btnSetStartTime = (Button) findViewById(R.id.btnSetStartTime);
         Button btnSetEndTime = (Button) findViewById(R.id.btnSetEndTime);
         btnStartTime = (TextView)findViewById(R.id.btnSetStartTime);
         btnEndTime = (TextView)findViewById(R.id.btnSetEndTime);
-
 
         //days Selector
         CheckBox mon = (CheckBox)findViewById(R.id.monSelector);
@@ -158,16 +145,13 @@ public class SettingActivity extends AppCompatActivity {
         CheckBox sat = (CheckBox)findViewById(R.id.saturSelector);
         CheckBox sun = (CheckBox)findViewById(R.id.sunSelector);
 
-
         //bus TextView
         busView =(TextView)findViewById(R.id.busSelector);
 
-
-        //button End
+        //button
         btnCreate = (Button) findViewById(R.id.alarmCreate);
         btnDelete = (Button)findViewById(R.id.alarmDelete);
         btnCancel = (Button) findViewById(R.id.alarmCancel);
-
 
         //for modify Check
         Intent modeIntent = getIntent();
@@ -185,7 +169,6 @@ public class SettingActivity extends AppCompatActivity {
                 finish();
             } else {
                 title = cursor.getString(1); //notiname
-                isSetTitle = true;
                 inputTitle.setText(title, TextView.BufferType.EDITABLE);
 
                 NODEID = cursor.getString(2); //nodeid
@@ -296,16 +279,6 @@ public class SettingActivity extends AppCompatActivity {
             }
         });
 
-
-        //Start Point View
-        //startPointRe = findViewById(R.id.startPointView);
-        //bus = getResources().getStringArray(R.array.bus_num);
-        //station = getResources().getStringArray(R.array.station_name);
-
-        //Collections.addAll(busList,bus);
-        //Collections.addAll(stationList,station);
-
-
         //Time Setting listener
         btnSetStartTime.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -362,62 +335,67 @@ public class SettingActivity extends AppCompatActivity {
         btnCreate.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                if(RouteIdList == null || title.trim().isEmpty()) {
+                if (RouteIdList == null || title == null || NODENAME == null) {
                     Toast.makeText(getApplicationContext(), "모두 입력해주세요", Toast.LENGTH_SHORT).show();
-                }else{
-                    if (days > 127){
-                        days = 127;
-                    }else if(days < 0){
-                        days = 0;
-                    }
-
-                    bandy = alarmHelper.getWritableDatabase();
-                    ContentValues values = new ContentValues();
-                    values.put(alarmHelper.notiName,title);
-                    values.put(alarmHelper.nodeId,NODEID);
-                    values.put(alarmHelper.nodeName,NODENAME);
-                    values.put(String.valueOf(alarmHelper.notiTime),notiTime);
-                    values.put(alarmHelper.startAt,startAt);
-                    values.put(alarmHelper.endAt,endAt);
-                    values.put(alarmHelper.days,days);
-                    values.put(alarmHelper.isOn,1);
-                    if(mode) {
-                        bandy.insert(alarmHelper.Notice, null, values);
-                        //bandy = alarmHelper.getReadableDatabase();
-                        cursor = bandy.rawQuery("Select notiId from Notice Order by notiId DESC limit 1;",null);
-                        cursor.moveToFirst();
-                        notiId = cursor.getInt(0);
-                        Log.d("notiId", String.valueOf(notiId));
-
-
-
+                } else {
+                    if(title.trim().isEmpty()) {
+                        Toast.makeText(getApplicationContext(), "모두 입력해주세요", Toast.LENGTH_SHORT).show();
                     }else{
-                        bandy.update(alarmHelper.Notice,values,"notiId = ?",new String[] { Integer.toString(notiId)} ); //알람 업데이트
-                        for(int i = 0; i < RouteIdList.size() ;i++) {
-                            bandy.delete(alarmHelper.RouteInNotice,  "notiId = ?", new String[]{Integer.toString(notiId)}); // 알람 노섬 삭제
+                        if (days > 127){
+                            days = 127;
+                        }else if(days < 0){
+                            days = 0;
                         }
-                    }
+
+                        bandy = alarmHelper.getWritableDatabase();
+                        ContentValues values = new ContentValues();
+                        values.put(alarmHelper.notiName,title);
+                        values.put(alarmHelper.nodeId,NODEID);
+                        values.put(alarmHelper.nodeName,NODENAME);
+                        values.put(String.valueOf(alarmHelper.notiTime),notiTime);
+                        values.put(alarmHelper.startAt,startAt);
+                        values.put(alarmHelper.endAt,endAt);
+                        values.put(alarmHelper.days,days);
+                        values.put(alarmHelper.isOn,1);
+                        if(mode) {
+                            bandy.insert(alarmHelper.Notice, null, values);
+                            //bandy = alarmHelper.getReadableDatabase();
+                            cursor = bandy.rawQuery("Select notiId from Notice Order by notiId DESC limit 1;",null);
+                            cursor.moveToFirst();
+                            notiId = cursor.getInt(0);
+                            Log.d("notiId", String.valueOf(notiId));
 
 
-                    Log.d("title",title);
-                    Log.d("days",days.toString());
-                    Log.d("start",startAt);
-                    Log.d("end",endAt);
-                    Log.d("nodeid",NODEID);
-                    Log.d("nodename",NODENAME);
-                    for(int i = 0; i < RouteIdList.size() ;i++){
-                        values.clear();
-                        values.put(String.valueOf(alarmHelper.notiId),notiId);
-                        values.put(alarmHelper.routeID,RouteIdList.get(i));
-                        values.put(alarmHelper.routeName,RouteNameList.get(i));
-                        bandy.insert(alarmHelper.RouteInNotice,null,values);
-                        Log.d("Routeid",RouteIdList.get(i));
-                        Log.d("Routename",RouteNameList.get(i));
+
+                        }else{
+                            bandy.update(alarmHelper.Notice,values,"notiId = ?",new String[] { Integer.toString(notiId)} ); //알람 업데이트
+                            for(int i = 0; i < RouteIdList.size() ;i++) {
+                                bandy.delete(alarmHelper.RouteInNotice,  "notiId = ?", new String[]{Integer.toString(notiId)}); // 알람 노섬 삭제
+                            }
+                        }
+
+
+                        Log.d("title",title);
+                        Log.d("days",days.toString());
+                        Log.d("start",startAt);
+                        Log.d("end",endAt);
+                        Log.d("nodeid",NODEID);
+                        Log.d("nodename",NODENAME);
+                        for(int i = 0; i < RouteIdList.size() ;i++){
+                            values.clear();
+                            values.put(String.valueOf(alarmHelper.notiId),notiId);
+                            values.put(alarmHelper.routeID,RouteIdList.get(i));
+                            values.put(alarmHelper.routeName,RouteNameList.get(i));
+                            bandy.insert(alarmHelper.RouteInNotice,null,values);
+                            Log.d("Routeid",RouteIdList.get(i));
+                            Log.d("Routename",RouteNameList.get(i));
+                        }
+                        Intent intent = new Intent();
+                        setResult(RESULT_OK, intent);
+                        finish();
                     }
-                    Intent intent = new Intent();
-                    setResult(RESULT_OK, intent);
-                    finish();
                 }
+
 
             }
 
