@@ -1,18 +1,10 @@
 package com.example.bandy;
 
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -24,13 +16,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import android.os.Bundle;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -65,7 +57,6 @@ public class NodeSelector extends AppCompatActivity implements OnMapReadyCallbac
     CameraUpdateFactory cam;
     LatLng marker;
 
-
     private String selectedName = "현재 위치";
     private String selectedID;
     private String selectedGPS_Long = "128.695744";
@@ -76,7 +67,6 @@ public class NodeSelector extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-
 
         //Window Blur
         WindowManager.LayoutParams layoutParams= new WindowManager.LayoutParams();
@@ -89,7 +79,7 @@ public class NodeSelector extends AppCompatActivity implements OnMapReadyCallbac
         ActionBar actionBar = getSupportActionBar();
         actionBar.hide();
 
-        //WindowSize
+        //WindowSize 팝업창 크기 조절
         DisplayMetrics dm = getApplicationContext().getResources().getDisplayMetrics();
         int width = (int) (dm.widthPixels * 0.9); // Display 사이즈의 90%
         int height = (int) (dm.heightPixels * 0.6);  // Display 사이즈의 90%
@@ -261,9 +251,6 @@ public class NodeSelector extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
-
-
-
         //지역 버스 정류장 목록 가져오기.
         res = getResources();
 
@@ -272,16 +259,6 @@ public class NodeSelector extends AppCompatActivity implements OnMapReadyCallbac
         localNodes_GPS_LONG = res.getStringArray(R.array.GPS_LONG_38010);
         localNodes_GPS_LATI = res.getStringArray(R.array.GPS_LATI_38010);
         localNodes_TP = res.getStringArray(R.array.NODE_TP_38010);
-
-
-        //Kakao Map 호출
-        //ViewGroup mapViewContainer = (ViewGroup) findViewById(R.id.map_view);
-        //mapViewContainer.addView(mapView);
-        //mapView.setZoomLevel(2, true);
-
-        //검색 기능
-        //editSearch = (EditText) findViewById(R.id.start_point_search);
-        //listView = (ListView) findViewById(R.id.listView);
 
         //검색 기능 - 지역 정류장 목록 삽입
         arrayList = new ArrayList<String>();
@@ -293,7 +270,6 @@ public class NodeSelector extends AppCompatActivity implements OnMapReadyCallbac
         //정류장 리스트 어댑터 연결
         searchAdapter = new SearchAdapter(list, this);
         //listView.setAdapter(searchAdapter);
-
 
         //자동 완성 검색
         final AutoCompleteTextView autoCompleteTextView = (AutoCompleteTextView) findViewById(R.id.autoCompleteTextView);
@@ -317,21 +293,8 @@ public class NodeSelector extends AppCompatActivity implements OnMapReadyCallbac
                         .position(marker)
                         .title(selectedName));
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(marker));
-                //정류장 위치를 1개만 출력하기 위해 마커 생성 전 초기화
-                //markerArr.clear();
-
-                //선택한 좌표로 마커 생성
-                //marker.setMapPoint(MapPoint.mapPointWithGeoCoord(Double.parseDouble(selectedGPS_Lati), Double.parseDouble(selectedGPS_Long)));
-                //marker.setItemName(selectedName);
-                //markerArr.add(marker);
-                //mapView.addPOIItems(markerArr.toArray(new MapPOIItem[markerArr.size()]));
-
-                //마커 위치로 화면 이동
-                //mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(Double.parseDouble(selectedGPS_Lati), Double.parseDouble(selectedGPS_Long)), true);
             }
         });
-
-
     }
 
     @Override
@@ -343,13 +306,11 @@ public class NodeSelector extends AppCompatActivity implements OnMapReadyCallbac
         marker = new LatLng(Double.valueOf(selectedGPS_Lati), Double.valueOf(selectedGPS_Long));
         mMap.clear();
 
-
         mMap.addMarker(new MarkerOptions()
                 .position(marker)
                 .title(selectedName));
         cam.zoomTo(16.0f);
         mMap.moveCamera(cam.newLatLng(marker));
-
     }
 
     // 검색을 수행하는 메소드
@@ -362,7 +323,7 @@ public class NodeSelector extends AppCompatActivity implements OnMapReadyCallbac
         if (charText.length() == 0) {
             list.addAll(arrayList);
         }
-        // 문자 입력을 할때..
+        // 문자 입력을 할때
         else
         {
             // 리스트의 모든 데이터를 검색한다.
@@ -379,41 +340,6 @@ public class NodeSelector extends AppCompatActivity implements OnMapReadyCallbac
         // 리스트 데이터가 변경되었으므로 어댑터터를 갱신하여 검색된 데이터를 화면에 보여준다.
         searchAdapter.notifyDataSetChanged();
     }
-    /*
-    public void performSearch(String charText) {
-        int changwonCode = 1;
-        String cityCode = Integer.toString(changwonCode);
-        String routeNo = charText;
-        String url = "http://openapi.tago.go.kr/openapi/service/BusRouteInfoInqireService/getRouteNoList?serviceKey="+key+"&cityCode="+cityCode+"&routeNo="+routeNo;
-        try {
-            this.startBusList = new OpenApi(url,routeNo).execute().get();
-            String bus[] = startBusList.split(",");
-            System.out.println("RETURN RESULT : "+bus[0]+" bus : "+bus[1]);
-            for(int i = 0 ; i < bus.length; i += 5){
-                list.add(bus[i+1]);
-            }
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-    public void getBusId(String busNum) {
-        int changwonCode = 1;
-        String cityCode = Integer.toString(changwonCode);
-        String url = "http://openapi.tago.go.kr/openapi/service/BusRouteInfoInqireService/getRouteNoList?serviceKey="+key+"&cityCode="+cityCode+"&routeNo="+busNum;
-        Log.d("OPEN API","버스번호 -> 버스id : " + url);
-    }*/
-
-    public void mapViewer(){
-        final int GPS_ENABLE_REQUEST_CODE = 2001;
-        final int PERMISSIONS_REQUEST_CODE = 100;
-    }
-    public void setMapMarker(){
-
-    }
-    public void onItemClick(){
-    }
 
     public void mOnClose(View v){
         //데이터 전달하기
@@ -421,10 +347,7 @@ public class NodeSelector extends AppCompatActivity implements OnMapReadyCallbac
         intent.putExtra("NODE_ID", selectedID);
         intent.putExtra("NODE_NAME", selectedName);
         setResult(RESULT_OK, intent);
-
-        //액티비티(팝업) 닫기
         finish();
-
     }
 
     //구글맵 마커 클릭 리스너
@@ -434,5 +357,4 @@ public class NodeSelector extends AppCompatActivity implements OnMapReadyCallbac
             return false;
         }
     };
-
 }

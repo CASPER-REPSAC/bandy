@@ -52,7 +52,6 @@ public class SettingActivity extends AppCompatActivity {
     int notiId;
     int isOn;
 
-
     //for Title
     String title;
     EditText inputTitle;
@@ -69,13 +68,11 @@ public class SettingActivity extends AppCompatActivity {
     Integer notiTime = 10;
     RadioGroup notiRadio;
 
-
     //for NodeSelect Intent
     TextView nodeView;
     Intent INTENTRESULT;
     String NODEID = null;
     String NODENAME = null;
-
 
     //for RouteSelect Intent
     Intent RouteIntentResult;
@@ -86,7 +83,6 @@ public class SettingActivity extends AppCompatActivity {
     Button btnCreate;
     Button btnDelete;
     Button btnCancel;
-
 
     private myDBHelper alarmHelper = new myDBHelper(this);;
     SQLiteDatabase bandy;
@@ -106,7 +102,6 @@ public class SettingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
-
 
         //textView 미리 세팅
         nodeView = (TextView) findViewById(R.id.startPointSelector);
@@ -155,8 +150,9 @@ public class SettingActivity extends AppCompatActivity {
 
         //for modify Check
         Intent modeIntent = getIntent();
+        // MODE 값 에러 났을 시 true 로 세팅
         mode = modeIntent.getBooleanExtra("MODE",true);
-        if (mode == false) {
+        if (mode == false) { // 수정 or 삭제
 
             btnDelete.setEnabled(true);
 
@@ -182,6 +178,7 @@ public class SettingActivity extends AppCompatActivity {
                 days = cursor.getInt(7);//days int
                 daysChecker(days, mode, mon, tues, wed, thur, fri, sat, sun);
                 isOn = cursor.getInt(8);//is On int
+                // 버스 리스트는 다시 세팅해야함
                 RouteIdList = null;
                 RouteNameList = null;
             }
@@ -333,7 +330,7 @@ public class SettingActivity extends AppCompatActivity {
         btnCreate.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                if (RouteIdList.size() == 0 || RouteIdList == null || title == null || NODENAME == null || startAt == null || endAt == null || days == 0) {
+                if (RouteIdList == null || RouteIdList.size() == 0 || title == null || NODENAME == null || startAt == null || endAt == null || days == 0) {
                     Toast.makeText(getApplicationContext(), "모두 입력해주세요", Toast.LENGTH_SHORT).show();
                 } else {
                     if(title.trim().isEmpty()) {
@@ -344,7 +341,6 @@ public class SettingActivity extends AppCompatActivity {
                         }else if(days < 0){
                             days = 127;
                         }
-
                         bandy = alarmHelper.getWritableDatabase();
                         ContentValues values = new ContentValues();
                         values.put(alarmHelper.notiName,title);
@@ -362,17 +358,12 @@ public class SettingActivity extends AppCompatActivity {
                             cursor.moveToFirst();
                             notiId = cursor.getInt(0);
                             Log.d("notiId", String.valueOf(notiId));
-
-
-
-                        }else{
+                        } else{
                             bandy.update(alarmHelper.Notice,values,"notiId = ?",new String[] { Integer.toString(notiId)} ); //알람 업데이트
                             for(int i = 0; i < RouteIdList.size() ;i++) {
                                 bandy.delete(alarmHelper.RouteInNotice,  "notiId = ?", new String[]{Integer.toString(notiId)}); // 알람 노섬 삭제
                             }
                         }
-
-
                         Log.d("title",title);
                         Log.d("days",days.toString());
                         Log.d("start",startAt);
@@ -418,6 +409,7 @@ public class SettingActivity extends AppCompatActivity {
         });
     }
 
+    // 수정일 때 요일 체크 후, 세팅
     private void daysChecker(Integer days, boolean mode, CheckBox mon, CheckBox tues, CheckBox wed, CheckBox thur, CheckBox fri, CheckBox sat, CheckBox sun) {
         if(!mode){
             if ((days & 64) >> 6 == 1){
@@ -444,24 +436,8 @@ public class SettingActivity extends AppCompatActivity {
         }
     }
 
-
-    /*
-    //타이틀 입력 후 엔터키 확인하기
-    public boolean onKey(View v, int keyCode, KeyEvent event){
-        if(keyCode == KeyEvent.KEYCODE_ENTER){
-            switch (v.getId()){
-                case R.id.routeTitle:
-                    title = inputTitle.toString();
-                    Log.d("title",title);
-                    break;
-            }
-            return true;
-        }
-        return false;
-    }*/
-
     public void mOnPopupClick(View v){
-        //데이터 담아서 팝업(액티비티) 호출
+        // 정류장 선택용 인텐트
         Intent intent = new Intent(this, NodeSelector.class);
         resultLauncher.launch(intent);
     }
@@ -502,6 +478,7 @@ public class SettingActivity extends AppCompatActivity {
             busLauncher.launch(intent);
         }
     }
+
     private ActivityResultLauncher<Intent> busLauncher  =  registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {

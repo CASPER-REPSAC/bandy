@@ -1,8 +1,5 @@
 package com.example.bandy;
 
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -17,6 +14,9 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,11 +59,9 @@ public class RouteSelector extends AppCompatActivity {
         getWindow().setAttributes(layoutParams);
         setContentView(R.layout.activity_route_selector);
 
-
         //Window Title
         ActionBar actionBar = getSupportActionBar();
         actionBar.hide();
-
 
         //WindowSize
         DisplayMetrics dm = getApplicationContext().getResources().getDisplayMetrics();
@@ -72,12 +70,10 @@ public class RouteSelector extends AppCompatActivity {
         getWindow().getAttributes().width = width;
         getWindow().getAttributes().height = height;
 
-
         //정류장 번호 받기
         Intent node = getIntent();
         selectedNodeId = node.getStringExtra("nodeid");
         bandy = busHelper.getReadableDatabase();
-
 
         //정류장 번호를 지나가는 버스 목록 받아오기
         cursor = bandy.rawQuery("Select nodeName, routeId, routeName from RouteInNode where nodeid = ?;",new String[] {selectedNodeId});
@@ -85,11 +81,9 @@ public class RouteSelector extends AppCompatActivity {
         searchedRouteCount = cursor.getCount();
         selectedNodeName = cursor.getString(0);
 
-
         //받아온 버스 전체 목록
         searchedRouteIdList.clear();
         searchedRouteNameList.clear();
-
 
         for(int i = 0; i < cursor.getCount();i++){
             searchedRouteIdList.add(cursor.getString(1));
@@ -137,16 +131,13 @@ public class RouteSelector extends AppCompatActivity {
                     PreparationItem saver = (PreparationItem) mAdapter.getItem(i);
                     selectedRouteNameList.add(saver.ItemStringname);
                     selectedRouteIdList.add(saver.ItemStringid);
-
                 }
             }
-
 
             for(int i = 0;i < selectedRouteIdList.size();i++){
                 Log.d("selected1", selectedRouteIdList.get(i));
                 Log.d("selected2", selectedRouteNameList.get(i));
             }
-
 
             //체크박스에서 선택된 버스의 id, 노선번호 전달하기
             Intent intent = new Intent(this, SettingActivity.class);

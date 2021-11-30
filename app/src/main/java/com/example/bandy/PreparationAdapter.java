@@ -36,7 +36,6 @@ public class PreparationAdapter extends BaseAdapter {
         return checkedCount;
     }
 
-
     //체크박스 선택이 끝난 리스트의 값 확인용도
     @Override
     public Object getItem(int p) {
@@ -78,5 +77,4 @@ public class PreparationAdapter extends BaseAdapter {
     public boolean isChecked(int p){
         return list.get(p).checked;
     }
-
 }

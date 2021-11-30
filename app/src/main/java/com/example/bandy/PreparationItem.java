@@ -9,7 +9,6 @@ public class PreparationItem {
     String ItemStringid;
     String ItemStringname;
 
-
     //생성자
     PreparationItem(boolean b, String i, String n){
         checked = b;
