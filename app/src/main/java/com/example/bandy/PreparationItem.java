@@ -4,7 +4,6 @@ public class PreparationItem {
 
     //체크박스로 선택되었는지 판단
     boolean checked;
-
     //버스 정보
     String ItemStringid;
     String ItemStringname;

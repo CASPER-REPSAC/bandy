@@ -152,10 +152,8 @@ public class SettingActivity extends AppCompatActivity {
         Intent modeIntent = getIntent();
         // MODE 값 에러 났을 시 true 로 세팅
         mode = modeIntent.getBooleanExtra("MODE",true);
-        if (mode == false) { // 수정 or 삭제
-
+        if (!mode) {
             btnDelete.setEnabled(true);
-
             notiId = modeIntent.getIntExtra("notiId", -1);
             bandy = alarmHelper.getReadableDatabase();
             cursor = bandy.rawQuery("Select * from Notice where notiId=" + Integer.toString(notiId) + ";", null);
@@ -171,7 +169,7 @@ public class SettingActivity extends AppCompatActivity {
                 NODENAME = cursor.getString(3);//nodename
                 nodeView.setText(NODENAME);
                 notiTime = cursor.getInt(4);//notitime int
-                startAt = cursor.getString(5);//startat
+                startAt = cursor.getString(5);//startatD
                 endAt = cursor.getString(6);//endat
                 btnStartTime.setText(startAt);
                 btnEndTime.setText(endAt);

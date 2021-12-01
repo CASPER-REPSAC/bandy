@@ -101,10 +101,9 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
         // DB 있는지 체크
         try {
             boolean bResult = isCheckDB(this);
-            Log.d("Bandy DB : ", "DB Check="+bResult);
             if(!bResult){ // DB가 없으면 복사
                 setDB(this);
-            }else{ }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -192,8 +191,6 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
     }
 
     public void setRecyclerView() {
-        Log.d("SetRecyclerView : ", "START");
-
         adapter.clear();
         recyclerView.setAdapter(adapter);
         sqlDB = dbHelper.getReadableDatabase();
@@ -224,10 +221,10 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
 
         Cursor routeCursor = null;
         int cnt = adapter.getItemCount();
-        Log.d("cnt ", String.valueOf(cnt));
         for (int i = 0; i < cnt; i++) {
             Notice curItem = adapter.getItem(i);
-            routeCursor = sqlDB.rawQuery("SELECT routeID, routeName FROM RouteInNotice WHERE notiId=" + curItem.getNotiId() + ";", null);
+            routeCursor = sqlDB.rawQuery("SELECT routeID, routeName FROM RouteInNotice WHERE notiId="
+                    + curItem.getNotiId() + ";", null);
 
             String[] routeIds = new String[2];
             String[] routeNames = new String[2];
@@ -478,7 +475,6 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
 
         @Override
         protected void onProgressUpdate(Integer... values) {
-            // todo
             super.onProgressUpdate(values);
             int noticeNo = values[0];
             int routeNo = values[1];
@@ -496,7 +492,8 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
             notice.setArrTimes(routeNo, resTimeStr);
             recyclerView.setAdapter(adapter);
             if (!notice.isCall(routeNo) && resTime <= notice.getNotiTime()) {
-                String msg = "[" + notice.getNodeName() +  "]" + notice.getRouteName(routeNo) + "번 버스가 " + resTimeStr + "분 후 도착합니다.";
+                String msg = "[" + notice.getNodeName() +  "]"
+                        + notice.getRouteName(routeNo) + "번 버스가 " + resTimeStr + "분 후 도착합니다.";
                 Notification(notice.getNotiName(), msg);
                 notice.setCall(true, routeNo);
             }
@@ -526,7 +523,7 @@ public class MainActivity extends AppCompatActivity implements AutoPermissionsLi
             while (!isCancelled()) {
                 publishProgress();
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

@@ -119,13 +119,10 @@ public class RouteSelector extends AppCompatActivity {
         selectedRouteNameList = new ArrayList<String>();
         selectedRouteIdList = new ArrayList<String>();
 
-        Log.d("selected1", "close");
-
         if (mAdapter.getCheckedCount() > 2) {
             Toast.makeText(getApplicationContext(), "노선은 2개까지 설정가능합니다.", Toast.LENGTH_SHORT).show();
         } else {
             for(int i = 0; i < searchedRouteCount;i++) {
-
                 //받아온 버스 중 체크박스로 체크된 것들을 리스트로 옮김.
                 if(mAdapter.isChecked(i)){
                     PreparationItem saver = (PreparationItem) mAdapter.getItem(i);
@@ -149,15 +146,9 @@ public class RouteSelector extends AppCompatActivity {
                 Log.d("before",selectedRouteNameList.get(i));
             }
             setResult(RESULT_OK, intent);
-
-            //디비 닫기
             bandy.close();
-
-            //액티비티(팝업) 닫기
             finish();
         }
-
-
     }
     public void OnClose(View v){
         selectedRouteNameList = new ArrayList<String>();

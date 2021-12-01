@@ -18,6 +18,7 @@ import org.w3c.dom.Text;
 import java.util.ArrayList;
 
 public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.ViewHolder> {
+    ArrayList<Notice> items = new ArrayList<>();
 
     // 커스텀 리스너 인터페이스
     public interface OnItemClickListener
@@ -32,8 +33,6 @@ public class NoticeAdapter extends RecyclerView.Adapter<NoticeAdapter.ViewHolder
         this.mListener = onItemClickListener;
     }
 
-
-    ArrayList<Notice> items = new ArrayList<>();
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView notiName;
